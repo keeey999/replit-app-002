@@ -313,10 +313,10 @@ export default function TeamBuilder() {
     }
     
     // 足りない役割を検出
-    const missingRoles = projectType.recommendedRoles.filter(role => !hasRoleInTeam(role));
+    const missingRoles = projectType.recommendedRoles.filter((role: string) => !hasRoleInTeam(role));
     
     // 足りないスキルを検出
-    const missingSkills = projectType.keySkills.filter(skill => !hasSkillInTeam(skill));
+    const missingSkills = projectType.keySkills.filter((skill: string) => !hasSkillInTeam(skill));
     
     // MBTI分布の最適化提案
     const mbtiSuggestion = getMbtiBalanceSuggestion(mbtiDistribution, projectType.idealMbtiDistribution);
@@ -1099,11 +1099,10 @@ export default function TeamBuilder() {
                     チームメンバー選択
                   </h3>
                   <Button 
-                    variant="outline" 
-                    className="bg-primary/5 border-primary/20 hover:bg-primary/10 text-primary flex items-center"
                     onClick={() => setShowAddMemberDialog(true)}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                       <path d="M12 5v14M5 12h14"></path>
                     </svg>
                     メンバー追加
@@ -1175,8 +1174,11 @@ export default function TeamBuilder() {
                 </div>
                 
                 <div className="mt-6 flex justify-center">
-                  <Button onClick={handleAnalyzeTeam} className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <Button 
+                    onClick={handleAnalyzeTeam} 
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-6 px-8 text-base font-medium"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                       <path d="M3 3v18h18"></path>
                       <path d="M18 17V9"></path>
                       <path d="M13 17V5"></path>
@@ -1734,7 +1736,7 @@ export default function TeamBuilder() {
                 <Button 
                   onClick={() => setActiveTab("setup")}
                   variant="outline"
-                  className="border-primary/20 hover:bg-primary/5"
+                  className="border-indigo-300 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-400 text-indigo-700 shadow-sm text-sm py-5 px-6"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                     <polyline points="15 18 9 12 15 6"></polyline>
