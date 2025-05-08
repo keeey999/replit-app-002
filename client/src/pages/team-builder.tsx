@@ -633,7 +633,6 @@ export default function TeamBuilder() {
           break;
         case 'デザイナー':
           categories['創造性'] += 3;
-          categories['デザイン'] += 2;
           break;
         case 'コミュニケーター':
         case 'マーケティングディレクター':
@@ -1021,6 +1020,156 @@ export default function TeamBuilder() {
                   ) : (
                     <p className="text-gray-500 text-sm">現在のチーム構成では特に大きな課題は見つかりませんでした。</p>
                   )}
+                </Card>
+              </div>
+              
+              {/* メンバーごとのスキル分析 */}
+              <div className="mb-8">
+                <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-purple-600">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                  </svg>
+                  メンバー別能力分析
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {selectedMembers.map((member) => (
+                    <Card key={member.id} className="shadow-md rounded-lg p-6 border-border/60">
+                      <div className="flex items-center mb-4">
+                        <Avatar className="h-12 w-12 mr-4 bg-primary/10">
+                          <AvatarFallback className={`${getMbtiTypeColorClass(member.mbtiType)}`}>
+                            {getUserInitials(member.username)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h4 className="text-md font-medium">{member.username}</h4>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMbtiTypeColorClass(member.mbtiType)}`}>
+                              {member.mbtiType}
+                            </span>
+                            {member.role && (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(member.role)}`}>
+                                {member.role}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="col-span-2 h-64">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={prepareRadarData(member)}>
+                              <PolarGrid />
+                              <PolarAngleAxis dataKey="category" tick={{ fill: '#6b7280', fontSize: 11 }} />
+                              <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                              <Radar
+                                name={member.username}
+                                dataKey="value"
+                                stroke="#8884d8"
+                                fill="#8884d8"
+                                fillOpacity={0.6}
+                              />
+                              <Tooltip />
+                            </RadarChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div className="col-span-1">
+                          <h5 className="text-sm font-medium mb-2">主要スキル</h5>
+                          <div className="space-y-1">
+                            {member.skills && Array.isArray(member.skills) && member.skills.length > 0 ? (
+                              member.skills.map((skill, index) => (
+                                <div key={index} className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mr-1 mb-1">
+                                  {skill}
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-sm text-gray-500">スキル未登録</p>
+                            )}
+                          </div>
+                          
+                          <h5 className="text-sm font-medium mt-4 mb-2">MBTIタイプ特性</h5>
+                          <div className="text-xs text-gray-600 space-y-1">
+                            <div>
+                              <span className="font-medium">{member.mbtiType[0]}</span>: {member.mbtiType[0] === 'E' ? '外向型' : '内向型'}
+                            </div>
+                            <div>
+                              <span className="font-medium">{member.mbtiType[1]}</span>: {member.mbtiType[1] === 'S' ? '感覚型' : '直感型'}
+                            </div>
+                            <div>
+                              <span className="font-medium">{member.mbtiType[2]}</span>: {member.mbtiType[2] === 'T' ? '思考型' : '感情型'}
+                            </div>
+                            <div>
+                              <span className="font-medium">{member.mbtiType[3]}</span>: {member.mbtiType[3] === 'J' ? '判断型' : '知覚型'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+              
+              {/* チームスキル分析 */}
+              <div className="mb-8">
+                <Card className="shadow-md rounded-lg p-6">
+                  <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-blue-600">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                    </svg>
+                    チームスキル分析
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* チームスキル分布 */}
+                    <div className="md:col-span-1 bg-blue-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-semibold text-blue-800 mb-3">主要スキル分布</h4>
+                      {prepareTeamSkillsData().length > 0 ? (
+                        <div className="h-60">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              layout="vertical"
+                              data={prepareTeamSkillsData()}
+                              margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis type="number" domain={[0, 100]} />
+                              <YAxis type="category" dataKey="skill" width={100} tick={{ fontSize: 10 }} />
+                              <Tooltip
+                                formatter={(value: any) => [`${value}%`, 'チーム内シェア']}
+                                labelFormatter={(label) => `スキル: ${label}`}
+                              />
+                              <Bar dataKey="percentage" fill="#6366f1" barSize={14} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500">スキルデータが不足しています</p>
+                      )}
+                    </div>
+                    
+                    {/* スキルベースの強み */}
+                    <div className="md:col-span-2">
+                      <h4 className="text-sm font-semibold text-blue-800 mb-3">スキルベースの強み</h4>
+                      {skillsBasedStrengths.length > 0 ? (
+                        <ul className="space-y-3">
+                          {skillsBasedStrengths.map((strength) => (
+                            <li key={strength.id} className="bg-blue-50 p-3 rounded-lg">
+                              <div className="flex mb-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                <span className="text-gray-700 font-medium">{strength.text}</span>
+                              </div>
+                              <p className="text-sm text-gray-600 ml-7">{strength.detail}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-gray-500 text-sm">チームスキルが不足しているため、分析できません。</p>
+                      )}
+                    </div>
+                  </div>
                 </Card>
               </div>
               
