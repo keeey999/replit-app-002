@@ -1056,17 +1056,17 @@ export default function TeamBuilder() {
   const skillsBasedStrengths = getSkillsBasedStrengths();
   
   return (
-    <section className="py-4">
+    <section className="py-4 px-2 sm:px-4">
       <div className="w-full">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold gradient-text text-center mb-8">
-            エンジニアチーム分析 <span className="text-sm font-medium text-muted-foreground ml-2">Powered by MBTI</span>
+          <h2 className="text-2xl sm:text-3xl font-bold gradient-text text-center mb-4 sm:mb-8">
+            エンジニアチーム分析 <span className="text-xs sm:text-sm font-medium text-muted-foreground ml-2">Powered by MBTI</span>
           </h2>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-              <TabsTrigger value="setup" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+              <TabsTrigger value="setup" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs sm:text-sm py-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 sm:mr-2 hidden sm:inline-block">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -1074,8 +1074,8 @@ export default function TeamBuilder() {
                 </svg>
                 チームメンバー
               </TabsTrigger>
-              <TabsTrigger value="analysis" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+              <TabsTrigger value="analysis" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs sm:text-sm py-2">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 sm:mr-2 hidden sm:inline-block">
                   <path d="M3 3v18h18"></path>
                   <path d="M18 17V9"></path>
                   <path d="M13 17V5"></path>
@@ -1291,16 +1291,16 @@ export default function TeamBuilder() {
               </Card>
               
               {/* Team Compatibility Matrix */}
-              <Card className="shadow-md rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-medium gradient-text mb-4">チーム相性マトリックス</h3>
+              <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-8">
+                <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム相性マトリックス</h3>
                 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <table className="min-w-full">
                     <thead>
                       <tr>
-                        <th className="w-36"></th>
+                        <th className="w-24 sm:w-36"></th>
                         {selectedMembers.map((member) => (
-                          <th key={member.id} className="px-4 py-2 text-center text-sm">
+                          <th key={member.id} className="px-2 sm:px-4 py-1 sm:py-2 text-center text-xs sm:text-sm">
                             {member.username.split(' ')[0]} ({member.mbtiType})
                           </th>
                         ))}
@@ -1309,7 +1309,7 @@ export default function TeamBuilder() {
                     <tbody>
                       {selectedMembers.map((row) => (
                         <tr key={row.id}>
-                          <td className="px-4 py-2 font-medium text-sm">
+                          <td className="px-2 sm:px-4 py-1 sm:py-2 font-medium text-xs sm:text-sm">
                             {row.username.split(' ')[0]} ({row.mbtiType})
                           </td>
                           {selectedMembers.map((col) => {
@@ -1339,39 +1339,39 @@ export default function TeamBuilder() {
               </Card>
               
               {/* Team Strengths and Challenges */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                 {/* Strengths */}
-                <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium gradient-text-accent mb-4 flex items-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-green-600">
+                <Card className="shadow-md rounded-lg p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-medium gradient-text-accent mb-3 sm:mb-4 flex items-center">
+                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                       <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
                     チームの強み
                   </h3>
                   {teamStrengths.length > 0 ? (
-                    <ul className="space-y-4">
+                    <ul className="space-y-2 sm:space-y-4">
                       {teamStrengths.map((strength) => (
-                        <li key={strength.id} className="bg-green-50 p-3 rounded-lg">
+                        <li key={strength.id} className="bg-green-50 p-2 sm:p-3 rounded-lg">
                           <div className="flex mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                            <span className="text-gray-700 font-medium">{strength.text}</span>
+                            <span className="text-gray-700 font-medium text-xs sm:text-sm">{strength.text}</span>
                           </div>
-                          <p className="text-sm text-gray-600 ml-7">{strength.detail}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 ml-5 sm:ml-7">{strength.detail}</p>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-gray-500 text-sm">チームメンバーが不足しているため、強みを分析できません。</p>
+                    <p className="text-gray-500 text-xs sm:text-sm">チームメンバーが不足しているため、強みを分析できません。</p>
                   )}
                 </Card>
                 
                 {/* Challenges */}
-                <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium gradient-text-accent mb-4 flex items-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-red-500">
+                <Card className="shadow-md rounded-lg p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-medium gradient-text-accent mb-3 sm:mb-4 flex items-center">
+                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                       <line x1="12" y1="9" x2="12" y2="13"></line>
                       <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -1379,25 +1379,25 @@ export default function TeamBuilder() {
                     チームの課題
                   </h3>
                   {teamChallenges.length > 0 ? (
-                    <ul className="space-y-4">
+                    <ul className="space-y-2 sm:space-y-4">
                       {teamChallenges.map((challenge) => (
-                        <li key={challenge.id} className="bg-red-50 p-3 rounded-lg">
+                        <li key={challenge.id} className="bg-red-50 p-2 sm:p-3 rounded-lg">
                           <div className="flex mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
-                            <span className="text-gray-700 font-medium">{challenge.text}</span>
+                            <span className="text-gray-700 font-medium text-xs sm:text-sm">{challenge.text}</span>
                           </div>
-                          <p className="text-sm text-gray-600 ml-7 mb-2">{challenge.detail}</p>
-                          <div className="bg-white p-2 rounded border border-red-100 ml-7">
-                            <p className="text-sm text-gray-600 font-medium">解決策: </p>
-                            <p className="text-sm text-gray-600">{challenge.solution}</p>
+                          <p className="text-xs sm:text-sm text-gray-600 ml-5 sm:ml-7 mb-2">{challenge.detail}</p>
+                          <div className="bg-white p-2 rounded border border-red-100 ml-5 sm:ml-7">
+                            <p className="text-xs sm:text-sm text-gray-600 font-medium">解決策: </p>
+                            <p className="text-xs sm:text-sm text-gray-600">{challenge.solution}</p>
                           </div>
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-gray-500 text-sm">現在のチーム構成では特に大きな課題は見つかりませんでした。</p>
+                    <p className="text-gray-500 text-xs sm:text-sm">現在のチーム構成では特に大きな課題は見つかりませんでした。</p>
                   )}
                 </Card>
               </div>
