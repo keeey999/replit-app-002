@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Select, 
@@ -13,48 +13,11 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { TEAM_GOAL_OPTIONS, TEAM_SIZE_OPTIONS, TEAM_PRIORITY_OPTIONS, TEAM_DURATION_OPTIONS } from "@/lib/constants";
 import { getCompatibility, getCompatibilityColorClass } from "@/lib/constants";
-
-// 役割とスキルの選択肢
-const ROLE_OPTIONS = [
-  "リーダー",
-  "プロジェクトマネージャー",
-  "アナリスト",
-  "システムアナリスト",
-  "コミュニケーター",
-  "デザイナー",
-  "マーケティングディレクター",
-  "オーガナイザー",
-  "イノベーター",
-  "エンジニア",
-  "開発者",
-  "テスター",
-  "メンバー",
-  "その他"
-];
-
-const SKILL_OPTIONS = [
-  "プロジェクト管理",
-  "リーダーシップ",
-  "分析",
-  "問題解決",
-  "技術開発",
-  "コミュニケーション",
-  "チームビルディング",
-  "創造性",
-  "構造化思考",
-  "組織化",
-  "プログラミング",
-  "デザイン",
-  "マーケティング",
-  "調査",
-  "文書作成",
-  "交渉",
-  "計画立案",
-  "その他"
-];
 
 interface TeamMember {
   id: number;
@@ -69,6 +32,14 @@ export default function TeamBuilder() {
   const { toast } = useToast();
   const [showAddMemberDialog, setShowAddMemberDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("setup");
+  const [teamSettings, setTeamSettings] = useState({
+    name: "",
+    description: "",
+    goal: TEAM_GOAL_OPTIONS[0],
+    size: TEAM_SIZE_OPTIONS[0],
+    priority: TEAM_PRIORITY_OPTIONS[0],
+    duration: TEAM_DURATION_OPTIONS[0]
+  });
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
     {
       id: 1,
@@ -102,14 +73,11 @@ export default function TeamBuilder() {
     skills: ""
   });
   
-  // メンバー削除機能
-  const handleDeleteMember = (memberId: number) => {
-    setTeamMembers(prev => prev.filter(member => member.id !== memberId));
-    
-    toast({
-      title: "メンバーを削除しました",
-      description: "チームメンバーリストから削除されました。",
-    });
+  const handleTeamSettingChange = (field: string, value: string) => {
+    setTeamSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
   
   const handleMemberSelection = (memberId: number, selected: boolean) => {
@@ -211,23 +179,15 @@ export default function TeamBuilder() {
   const getRoleBadgeClass = (role: string): string => {
     switch (role) {
       case "リーダー":
-      case "プロジェクトマネージャー":
         return "bg-blue-100 text-blue-800";
       case "アナリスト":
-      case "システムアナリスト":
         return "bg-green-100 text-green-800";
       case "コミュニケーター":
-      case "マーケティングディレクター":
         return "bg-purple-100 text-purple-800";
       case "オーガナイザー":
         return "bg-orange-100 text-orange-800";
       case "イノベーター":
-      case "デザイナー":
         return "bg-pink-100 text-pink-800";
-      case "エンジニア":
-      case "開発者":
-      case "テスター":
-        return "bg-indigo-100 text-indigo-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -264,143 +224,6 @@ export default function TeamBuilder() {
   const selectedMembers = teamMembers.filter(member => member.selected);
   const mbtiDistribution = calculateMbtiDistribution();
   
-  // チームの強みを判断
-  const getTeamStrengths = () => {
-    const strengths = [];
-    
-    if (selectedMembers.some(m => m.mbtiType.includes('ENT'))) {
-      strengths.push({ 
-        id: 'leadership', 
-        text: 'リーダーシップとビジョン設定の能力（ENTJ/ENTP）',
-        detail: 'チームを率いて大局的な方向性を示し、戦略的な目標設定ができます。意思決定が早く、プロジェクト推進力が高いです。'
-      });
-    }
-    
-    if (selectedMembers.some(m => m.mbtiType.includes('INT'))) {
-      strengths.push({ 
-        id: 'analysis', 
-        text: '論理的分析と問題解決能力（INTJ/INTP）',
-        detail: '複雑な問題を論理的に分析し、独創的な解決策を見出すことができます。長期的な視点を持ち、効率的なシステム構築に優れています。'
-      });
-    }
-    
-    if (selectedMembers.some(m => m.mbtiType.includes('NFJ'))) {
-      strengths.push({ 
-        id: 'harmony', 
-        text: 'チームの調和を保つ能力（ENFJ/INFJ）',
-        detail: 'メンバー間の関係性を重視し、調和のとれたコミュニケーションを促進します。チームの意欲を高め、個々の強みを引き出すことに長けています。'
-      });
-    }
-    
-    if (selectedMembers.some(m => m.mbtiType.includes('STJ'))) {
-      strengths.push({ 
-        id: 'execution', 
-        text: '実務的で組織的な実行力（ESTJ/ISTJ）',
-        detail: '綿密な計画立案と正確な実行を得意とします。責任感が強く、期限や品質基準を厳守することでプロジェクトの安定性を確保します。'
-      });
-    }
-    
-    if (selectedMembers.some(m => m.mbtiType.includes('NFP'))) {
-      strengths.push({ 
-        id: 'creativity', 
-        text: '創造性と柔軟な発想（ENFP/INFP）',
-        detail: '独創的な発想と可能性を追求する姿勢があります。人間中心の視点で問題に取り組み、革新的なアイデアを生み出す力があります。'
-      });
-    }
-    
-    if (selectedMembers.some(m => m.mbtiType.includes('SFJ'))) {
-      strengths.push({ 
-        id: 'support', 
-        text: '細やかなサポートとチームケア（ESFJ/ISFJ）',
-        detail: 'メンバーのニーズに敏感に反応し、協力的な環境づくりに貢献します。詳細に気を配り、チーム内の人間関係や実務面での支援が得意です。'
-      });
-    }
-    
-    return strengths;
-  };
-  
-  // チームの課題を判断
-  const getTeamChallenges = () => {
-    const challenges = [];
-    
-    if (mbtiDistribution.tVsF.T > mbtiDistribution.tVsF.F * 2 && mbtiDistribution.tVsF.T >= 2) {
-      challenges.push({ 
-        id: 'emotional_intelligence', 
-        text: '感情面への配慮が不足する可能性（T型が多い）',
-        detail: '論理や効率を重視するあまり、チーム内の感情的な側面や人間関係の重要性を見落とす可能性があります。決断が冷淡に映ることもあるでしょう。',
-        solution: '意識的に感情面への配慮を行い、重要な決定の際には全員の意見や感情を考慮するプロセスを設けましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.tVsF.F > mbtiDistribution.tVsF.T * 2 && mbtiDistribution.tVsF.F >= 2) {
-      challenges.push({ 
-        id: 'objective_decision', 
-        text: '客観的な判断が難しい場合がある（F型が多い）',
-        detail: '人間関係や調和を重視するあまり、困難な決断や客観的評価が必要な場面で躊躇することがあります。批判的なフィードバックがチーム内で不足する可能性があります。',
-        solution: '客観的な評価基準を事前に設定し、データに基づいた意思決定の仕組みを取り入れましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.jVsP.J > mbtiDistribution.jVsP.P * 2 && mbtiDistribution.jVsP.J >= 2) {
-      challenges.push({ 
-        id: 'flexibility', 
-        text: '柔軟性に欠ける可能性がある（J型が多い）',
-        detail: '計画通りに物事を進めることを好むため、状況変化への対応が遅れることがあります。新しいアイデアや方法に対して抵抗を示すことがあります。',
-        solution: '定期的に計画や方法を見直す時間を設け、変化に対応するための余裕を計画に組み込みましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.jVsP.P > mbtiDistribution.jVsP.J * 2 && mbtiDistribution.jVsP.P >= 2) {
-      challenges.push({ 
-        id: 'deadline', 
-        text: '締め切りや計画の遵守が難しい場合がある（P型が多い）',
-        detail: '柔軟性を重視するあまり、締め切りの厳守や計画的な進行が難しくなることがあります。最終決定を先延ばしにする傾向があります。',
-        solution: '明確なマイルストーンと中間チェックポイントを設定し、進捗を可視化する仕組みを導入しましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.eVsI.I > mbtiDistribution.eVsI.E * 2 && mbtiDistribution.eVsI.I >= 2) {
-      challenges.push({ 
-        id: 'communication', 
-        text: '活発なコミュニケーションが不足する可能性（I型が多い）',
-        detail: '内省的なメンバーが多いため、自発的な情報共有やディスカッションが不足しがちです。意見や懸念が表明されないまま進行することがあります。',
-        solution: '定期的な1対1のミーティングやオンラインでの非同期コミュニケーションの仕組みを取り入れましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.eVsI.E > mbtiDistribution.eVsI.I * 2 && mbtiDistribution.eVsI.E >= 2) {
-      challenges.push({ 
-        id: 'depth', 
-        text: '深い思考や集中作業の時間が確保しにくい（E型が多い）',
-        detail: '対話や議論が活発な一方で、個人の集中作業や内省の時間が十分に確保されないことがあります。また、意思決定が性急になる可能性があります。',
-        solution: '「ディープワーク」の時間を明示的にスケジュールに組み込み、集中作業の環境を整えましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.sVsN.S > mbtiDistribution.sVsN.N * 2 && mbtiDistribution.sVsN.S >= 2) {
-      challenges.push({ 
-        id: 'innovation', 
-        text: '革新的なアイデアや長期的なビジョンが不足する可能性（S型が多い）',
-        detail: '現実的で実践的なアプローチを好むあまり、革新的な発想や将来を見据えた計画が不足する可能性があります。',
-        solution: 'ブレインストーミングやアイデア創出のセッションを定期的に設け、「もし〜だったら」という仮説思考を促しましょう。'
-      });
-    }
-    
-    if (mbtiDistribution.sVsN.N > mbtiDistribution.sVsN.S * 2 && mbtiDistribution.sVsN.N >= 2) {
-      challenges.push({ 
-        id: 'practicality', 
-        text: '実務的な詳細への注意が不足する可能性（N型が多い）',
-        detail: '大局的なビジョンや可能性を追求するあまり、実装の詳細や現実的な制約への配慮が不足しがちです。',
-        solution: '実行計画に具体的なチェックリストを含め、詳細な品質基準や要件を明文化しましょう。'
-      });
-    }
-    
-    return challenges;
-  };
-  
-  const teamStrengths = getTeamStrengths();
-  const teamChallenges = getTeamChallenges();
-  
   return (
     <section className="py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -409,11 +232,107 @@ export default function TeamBuilder() {
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="setup">チームメンバー</TabsTrigger>
+              <TabsTrigger value="setup">チーム設定</TabsTrigger>
               <TabsTrigger value="analysis">チーム分析</TabsTrigger>
             </TabsList>
             
             <TabsContent value="setup" className="mt-6">
+              <Card className="shadow-md rounded-lg p-6 mb-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">チーム編成のための条件設定</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <Label htmlFor="team-name">チーム名</Label>
+                    <Input
+                      id="team-name"
+                      value={teamSettings.name}
+                      onChange={(e) => handleTeamSettingChange("name", e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="team-description">チームの説明</Label>
+                    <Textarea
+                      id="team-description"
+                      value={teamSettings.description}
+                      onChange={(e) => handleTeamSettingChange("description", e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="team-goal">チームの目標</Label>
+                    <Select
+                      value={teamSettings.goal}
+                      onValueChange={(value) => handleTeamSettingChange("goal", value)}
+                    >
+                      <SelectTrigger id="team-goal" className="mt-1">
+                        <SelectValue placeholder="目標を選択" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEAM_GOAL_OPTIONS.map((goal) => (
+                          <SelectItem key={goal} value={goal}>{goal}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="team-size">チームの人数</Label>
+                    <Select
+                      value={teamSettings.size}
+                      onValueChange={(value) => handleTeamSettingChange("size", value)}
+                    >
+                      <SelectTrigger id="team-size" className="mt-1">
+                        <SelectValue placeholder="人数を選択" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEAM_SIZE_OPTIONS.map((size) => (
+                          <SelectItem key={size} value={size}>{size}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="priority">優先する要素</Label>
+                    <Select
+                      value={teamSettings.priority}
+                      onValueChange={(value) => handleTeamSettingChange("priority", value)}
+                    >
+                      <SelectTrigger id="priority" className="mt-1">
+                        <SelectValue placeholder="優先要素を選択" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEAM_PRIORITY_OPTIONS.map((priority) => (
+                          <SelectItem key={priority} value={priority}>{priority}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="duration">プロジェクト期間</Label>
+                    <Select
+                      value={teamSettings.duration}
+                      onValueChange={(value) => handleTeamSettingChange("duration", value)}
+                    >
+                      <SelectTrigger id="duration" className="mt-1">
+                        <SelectValue placeholder="期間を選択" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TEAM_DURATION_OPTIONS.map((duration) => (
+                          <SelectItem key={duration} value={duration}>{duration}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </Card>
+              
               {/* Team Members Selection */}
               <Card className="shadow-md rounded-lg p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -442,7 +361,6 @@ export default function TeamBuilder() {
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -480,16 +398,6 @@ export default function TeamBuilder() {
                               checked={member.selected}
                               onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
                             />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleDeleteMember(member.id)}
-                              className="text-red-600 hover:text-red-800"
-                            >
-                              削除
-                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -658,49 +566,95 @@ export default function TeamBuilder() {
                 {/* Strengths */}
                 <Card className="shadow-md rounded-lg p-6">
                   <h3 className="text-lg font-medium text-green-600 mb-4">チームの強み</h3>
-                  {teamStrengths.length > 0 ? (
-                    <ul className="space-y-4">
-                      {teamStrengths.map((strength) => (
-                        <li key={strength.id} className="bg-green-50 p-3 rounded-lg">
-                          <div className="flex mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-gray-700 font-medium">{strength.text}</span>
-                          </div>
-                          <p className="text-sm text-gray-600 ml-7">{strength.detail}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 text-sm">チームメンバーが不足しているため、強みを分析できません。</p>
-                  )}
+                  <ul className="space-y-3">
+                    {selectedMembers.some(m => m.mbtiType.includes('ENT')) && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">リーダーシップとビジョン設定の能力（ENTJ/ENTP）</span>
+                      </li>
+                    )}
+                    {selectedMembers.some(m => m.mbtiType.includes('INT')) && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">論理的分析と問題解決能力（INTJ/INTP）</span>
+                      </li>
+                    )}
+                    {selectedMembers.some(m => m.mbtiType.includes('NFJ')) && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">チームの調和を保つ能力（ENFJ/INFJ）</span>
+                      </li>
+                    )}
+                    {selectedMembers.some(m => m.mbtiType.includes('STJ')) && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">実務的で組織的な実行力（ESTJ/ISTJ）</span>
+                      </li>
+                    )}
+                    {selectedMembers.some(m => m.mbtiType.includes('NFP')) && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">創造性と柔軟な発想（ENFP/INFP）</span>
+                      </li>
+                    )}
+                  </ul>
                 </Card>
                 
                 {/* Challenges */}
                 <Card className="shadow-md rounded-lg p-6">
                   <h3 className="text-lg font-medium text-red-600 mb-4">チームの課題</h3>
-                  {teamChallenges.length > 0 ? (
-                    <ul className="space-y-4">
-                      {teamChallenges.map((challenge) => (
-                        <li key={challenge.id} className="bg-red-50 p-3 rounded-lg">
-                          <div className="flex mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-gray-700 font-medium">{challenge.text}</span>
-                          </div>
-                          <p className="text-sm text-gray-600 ml-7 mb-2">{challenge.detail}</p>
-                          <div className="bg-white p-2 rounded border border-red-100 ml-7">
-                            <p className="text-sm text-gray-600 font-medium">解決策: </p>
-                            <p className="text-sm text-gray-600">{challenge.solution}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 text-sm">現在のチーム構成では特に大きな課題は見つかりませんでした。</p>
-                  )}
+                  <ul className="space-y-3">
+                    {mbtiDistribution.tVsF.T > mbtiDistribution.tVsF.F * 2 && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">感情面への配慮が不足する可能性（T型が多い）</span>
+                      </li>
+                    )}
+                    {mbtiDistribution.tVsF.F > mbtiDistribution.tVsF.T * 2 && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">客観的な判断が難しい場合がある（F型が多い）</span>
+                      </li>
+                    )}
+                    {mbtiDistribution.jVsP.J > mbtiDistribution.jVsP.P * 2 && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">柔軟性に欠ける可能性がある（J型が多い）</span>
+                      </li>
+                    )}
+                    {mbtiDistribution.jVsP.P > mbtiDistribution.jVsP.J * 2 && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">締め切りや計画の遵守が難しい場合がある（P型が多い）</span>
+                      </li>
+                    )}
+                    {mbtiDistribution.eVsI.I > mbtiDistribution.eVsI.E * 2 && (
+                      <li className="flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mt-0.5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700">活発なコミュニケーションが不足する可能性（I型が多い）</span>
+                      </li>
+                    )}
+                  </ul>
                 </Card>
               </div>
               
@@ -748,36 +702,22 @@ export default function TeamBuilder() {
                 
                 <div className="grid gap-2">
                   <Label htmlFor="role">役割</Label>
-                  <Select
+                  <Input
+                    id="role"
                     value={newMember.role}
-                    onValueChange={(value) => setNewMember(prev => ({ ...prev, role: value }))}
-                  >
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="役割を選択" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROLE_OPTIONS.map((role) => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(e) => setNewMember(prev => ({ ...prev, role: e.target.value }))}
+                    placeholder="例: プロジェクトマネージャー"
+                  />
                 </div>
                 
                 <div className="grid gap-2">
                   <Label htmlFor="skills">スキル・強み</Label>
-                  <Select
+                  <Input
+                    id="skills"
                     value={newMember.skills}
-                    onValueChange={(value) => setNewMember(prev => ({ ...prev, skills: value }))}
-                  >
-                    <SelectTrigger id="skills">
-                      <SelectValue placeholder="スキルを選択" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SKILL_OPTIONS.map((skill) => (
-                        <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(e) => setNewMember(prev => ({ ...prev, skills: e.target.value }))}
+                    placeholder="例: プロジェクト管理, リーダーシップ"
+                  />
                 </div>
               </div>
               
