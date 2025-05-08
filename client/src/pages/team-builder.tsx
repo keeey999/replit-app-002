@@ -1087,10 +1087,10 @@ export default function TeamBuilder() {
             
             <TabsContent value="setup" className="mt-6">
               {/* Team Members Selection */}
-              <Card className="shadow-md rounded-lg p-6 border-border/60">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium gradient-text flex items-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-primary">
+              <Card className="shadow-md rounded-lg p-3 sm:p-6 border-border/60">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
+                  <h3 className="text-base sm:text-lg font-medium gradient-text flex items-center">
+                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                       <circle cx="9" cy="7" r="4"></circle>
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -1100,69 +1100,70 @@ export default function TeamBuilder() {
                   </h3>
                   <Button 
                     onClick={() => setShowAddMemberDialog(true)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-1 sm:py-2"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <svg width="14" height="14" className="sm:w-4 sm:h-4 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 5v14M5 12h14"></path>
                     </svg>
                     メンバー追加
                   </Button>
                 </div>
                 
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 scrollbar-hide">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MBTIタイプ</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">MBTIタイプ</th>
+                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
+                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
+                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
+                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {teamMembers.map((member) => (
                         <tr key={member.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <Avatar className="h-10 w-10">
-                                <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                              <Avatar className="h-6 w-6 sm:h-10 sm:w-10">
+                                <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
                                   {getUserInitials(member.username)}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">{member.username}</div>
+                              <div className="ml-2 sm:ml-4">
+                                <div className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                             {member.mbtiType ? (
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
+                              <span className={`px-1 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
                                 {member.mbtiType}
                               </span>
                             ) : (
-                              <span className="text-gray-400 text-xs">未設定</span>
+                              <span className="text-gray-400 text-[10px] sm:text-xs">未設定</span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
                             {member.skills || "未設定"}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
                             {member.role || "未設定"}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
                             <Checkbox 
                               checked={member.selected}
                               onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
+                              className="h-3 w-3 sm:h-4 sm:w-4"
                             />
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
                             <Button 
                               variant="ghost" 
                               size="sm"
                               onClick={() => handleDeleteMember(member.id)}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-red-600 hover:text-red-800 h-6 px-2 py-1 sm:h-8 sm:px-3 sm:py-1"
                             >
                               削除
                             </Button>
@@ -1173,12 +1174,12 @@ export default function TeamBuilder() {
                   </table>
                 </div>
                 
-                <div className="mt-6 flex justify-center">
+                <div className="mt-4 sm:mt-6 flex justify-center">
                   <Button 
                     onClick={handleAnalyzeTeam} 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-6 px-8 text-base font-medium"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-4 sm:py-6 px-4 sm:px-8 text-sm sm:text-base font-medium"
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 3v18h18"></path>
                       <path d="M18 17V9"></path>
                       <path d="M13 17V5"></path>
@@ -1192,30 +1193,30 @@ export default function TeamBuilder() {
             
             <TabsContent value="analysis" className="mt-6">
               {/* Team Composition Overview */}
-              <Card className="shadow-md rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-medium gradient-text mb-4">チーム構成概要</h3>
+              <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+                <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム構成概要</h3>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   {/* Team Members */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">チームメンバー</h4>
-                    <ul className="space-y-3">
+                    <h4 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">チームメンバー</h4>
+                    <ul className="space-y-2 sm:space-y-3">
                       {selectedMembers.map((member) => {
                         const suggestedRole = member.role || assignRoleByMbtiType(member.mbtiType);
                         const roleClass = getRoleBadgeClass(suggestedRole);
                         
                         return (
                           <li key={member.id} className="flex items-center">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
                                 {getUserInitials(member.username)}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="ml-3">
-                              <p className="text-sm font-medium text-gray-900">{member.username}</p>
-                              <p className="text-xs text-gray-500">{member.mbtiType}</p>
+                            <div className="ml-2 sm:ml-3">
+                              <p className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</p>
+                              <p className="text-[10px] sm:text-xs text-gray-500">{member.mbtiType}</p>
                             </div>
-                            <span className={`ml-auto px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${roleClass}`}>
+                            <span className={`ml-auto px-1.5 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${roleClass}`}>
                               {suggestedRole}
                             </span>
                           </li>
@@ -1226,60 +1227,60 @@ export default function TeamBuilder() {
                   
                   {/* MBTI Distribution */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">MBTI分布</h4>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <div className="space-y-4">
+                    <h4 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">MBTI分布</h4>
+                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                      <div className="space-y-3 sm:space-y-4">
                         <div>
-                          <p className="text-sm font-medium mb-1">外向型 vs 内向型 (E vs I)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <p className="text-xs sm:text-sm font-medium mb-1">外向型 vs 内向型 (E vs I)</p>
+                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
                             <div 
-                              className="bg-blue-600 h-2.5 rounded-full" 
+                              className="bg-blue-600 h-2 sm:h-2.5 rounded-full" 
                               style={{width: `${(mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100) || 0}%`}}
                             ></div>
                           </div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
                             <span>E: {mbtiDistribution.eVsI.E}</span>
                             <span>I: {mbtiDistribution.eVsI.I}</span>
                           </div>
                         </div>
                         
                         <div>
-                          <p className="text-sm font-medium mb-1">感覚型 vs 直感型 (S vs N)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <p className="text-xs sm:text-sm font-medium mb-1">感覚型 vs 直感型 (S vs N)</p>
+                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
                             <div 
-                              className="bg-green-600 h-2.5 rounded-full" 
+                              className="bg-green-600 h-2 sm:h-2.5 rounded-full" 
                               style={{width: `${(mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100) || 0}%`}}
                             ></div>
                           </div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
                             <span>S: {mbtiDistribution.sVsN.S}</span>
                             <span>N: {mbtiDistribution.sVsN.N}</span>
                           </div>
                         </div>
                         
                         <div>
-                          <p className="text-sm font-medium mb-1">思考型 vs 感情型 (T vs F)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <p className="text-xs sm:text-sm font-medium mb-1">思考型 vs 感情型 (T vs F)</p>
+                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
                             <div 
-                              className="bg-purple-600 h-2.5 rounded-full" 
+                              className="bg-purple-600 h-2 sm:h-2.5 rounded-full" 
                               style={{width: `${(mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100) || 0}%`}}
                             ></div>
                           </div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
                             <span>T: {mbtiDistribution.tVsF.T}</span>
                             <span>F: {mbtiDistribution.tVsF.F}</span>
                           </div>
                         </div>
                         
                         <div>
-                          <p className="text-sm font-medium mb-1">判断型 vs 知覚型 (J vs P)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <p className="text-xs sm:text-sm font-medium mb-1">判断型 vs 知覚型 (J vs P)</p>
+                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
                             <div 
-                              className="bg-orange-600 h-2.5 rounded-full" 
+                              className="bg-orange-600 h-2 sm:h-2.5 rounded-full" 
                               style={{width: `${(mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100) || 0}%`}}
                             ></div>
                           </div>
-                          <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
                             <span>J: {mbtiDistribution.jVsP.J}</span>
                             <span>P: {mbtiDistribution.jVsP.P}</span>
                           </div>
@@ -1291,16 +1292,16 @@ export default function TeamBuilder() {
               </Card>
               
               {/* Team Compatibility Matrix */}
-              <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-8">
+              <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
                 <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム相性マトリックス</h3>
                 
-                <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide">
                   <table className="min-w-full">
                     <thead>
                       <tr>
-                        <th className="w-24 sm:w-36"></th>
+                        <th className="w-20 sm:w-24 md:w-36"></th>
                         {selectedMembers.map((member) => (
-                          <th key={member.id} className="px-2 sm:px-4 py-1 sm:py-2 text-center text-xs sm:text-sm">
+                          <th key={member.id} className="px-1 sm:px-2 md:px-4 py-1 md:py-2 text-center text-[10px] sm:text-xs md:text-sm">
                             {member.username.split(' ')[0]} ({member.mbtiType})
                           </th>
                         ))}
@@ -1309,14 +1310,14 @@ export default function TeamBuilder() {
                     <tbody>
                       {selectedMembers.map((row) => (
                         <tr key={row.id}>
-                          <td className="px-2 sm:px-4 py-1 sm:py-2 font-medium text-xs sm:text-sm">
+                          <td className="px-1 sm:px-2 md:px-4 py-1 md:py-2 font-medium text-[10px] sm:text-xs md:text-sm">
                             {row.username.split(' ')[0]} ({row.mbtiType})
                           </td>
                           {selectedMembers.map((col) => {
                             // 自分自身との相性は表示しない
                             if (row.id === col.id) {
                               return (
-                                <td key={col.id} className="px-4 py-2 text-center bg-gray-100">
+                                <td key={col.id} className="px-2 sm:px-3 md:px-4 py-1 md:py-2 text-center bg-gray-100">
                                   -
                                 </td>
                               );
@@ -1326,8 +1327,8 @@ export default function TeamBuilder() {
                             const colorClass = getCompatibilityColorClass(compatibility);
                             
                             return (
-                              <td key={col.id} className={`px-4 py-2 text-center ${colorClass}`}>
-                                <span className="font-medium">{compatibility}</span>
+                              <td key={col.id} className={`px-2 sm:px-3 md:px-4 py-1 md:py-2 text-center ${colorClass}`}>
+                                <span className="font-medium text-[10px] sm:text-xs md:text-sm">{compatibility}</span>
                               </td>
                             );
                           })}
