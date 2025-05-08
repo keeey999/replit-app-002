@@ -442,8 +442,242 @@ export default function TeamBuilder() {
     return challenges;
   };
   
+  // メンバースキルの分布を計算
+  const calculateSkillDistribution = () => {
+    const selectedMembers = teamMembers.filter(member => member.selected);
+    const skillsCount: Record<string, number> = {};
+    
+    // 各スキルの出現回数をカウント
+    selectedMembers.forEach(member => {
+      if (member.skills && Array.isArray(member.skills)) {
+        member.skills.forEach(skill => {
+          if (skillsCount[skill]) {
+            skillsCount[skill]++;
+          } else {
+            skillsCount[skill] = 1;
+          }
+        });
+      }
+    });
+    
+    // チャート用にデータを整形
+    const data = Object.entries(skillsCount)
+      .map(([skill, count]) => ({
+        skill,
+        count,
+        percentage: Math.round((count / selectedMembers.length) * 100)
+      }))
+      .sort((a, b) => b.count - a.count);
+    
+    return data;
+  };
+  
+  // メンバーのスキルに基づいた強みを分析
+  const getSkillsBasedStrengths = () => {
+    const skillDistribution = calculateSkillDistribution();
+    const strengths = [];
+    
+    // 技術的なスキルが多いか確認
+    const technicalSkills = ['プログラミング', '技術開発', '分析', '問題解決'];
+    const hasTechnicalFocus = technicalSkills.some(skill => 
+      skillDistribution.some(item => item.skill === skill && item.percentage >= 50)
+    );
+    
+    if (hasTechnicalFocus) {
+      strengths.push({
+        id: 'technical',
+        text: '技術力と問題解決能力',
+        detail: 'チームは複雑な技術的課題に取り組む能力があります。問題解決能力と分析力を活かした難題への対応が期待できます。'
+      });
+    }
+    
+    // コミュニケーション系スキルが多いか確認
+    const communicationSkills = ['コミュニケーション', 'チームビルディング', '交渉', '調査'];
+    const hasCommunicationFocus = communicationSkills.some(skill => 
+      skillDistribution.some(item => item.skill === skill && item.percentage >= 50)
+    );
+    
+    if (hasCommunicationFocus) {
+      strengths.push({
+        id: 'communication',
+        text: 'コミュニケーションとチーム構築能力',
+        detail: 'チームは優れたコミュニケーション能力を持ち、メンバー間の連携やステークホルダーとの関係構築に長けています。'
+      });
+    }
+    
+    // 創造性や革新性のスキルが多いか確認
+    const creativeSkills = ['創造性', 'デザイン', 'イノベーション'];
+    const hasCreativeFocus = creativeSkills.some(skill => 
+      skillDistribution.some(item => item.skill === skill && item.percentage >= 30)
+    );
+    
+    if (hasCreativeFocus) {
+      strengths.push({
+        id: 'creativity',
+        text: '創造性と革新的思考',
+        detail: 'チームは新しいアイデアを生み出し、従来の枠にとらわれない革新的なアプローチを取ることができます。'
+      });
+    }
+    
+    // マネジメント系スキルが多いか確認
+    const managementSkills = ['プロジェクト管理', 'リーダーシップ', '計画立案', '組織化'];
+    const hasManagementFocus = managementSkills.some(skill => 
+      skillDistribution.some(item => item.skill === skill && item.percentage >= 40)
+    );
+    
+    if (hasManagementFocus) {
+      strengths.push({
+        id: 'management',
+        text: 'プロジェクト管理と組織力',
+        detail: 'チームはプロジェクトを効率的に進める能力と、組織的に物事を遂行する力があります。計画性と実行力を併せ持っています。'
+      });
+    }
+    
+    return strengths;
+  };
+  
+  // レーダーチャート用データの準備
+  const prepareRadarData = (member: TeamMember) => {
+    // スキルカテゴリーとレーティング
+    const categories = {
+      'プログラミング': 0,
+      'プロジェクト管理': 0,
+      'コミュニケーション': 0,
+      '分析': 0,
+      '創造性': 0,
+      'リーダーシップ': 0,
+    };
+    
+    // スキルとカテゴリーのマッピング
+    const skillCategoryMap: Record<string, keyof typeof categories> = {
+      'プログラミング': 'プログラミング',
+      '技術開発': 'プログラミング',
+      'プロジェクト管理': 'プロジェクト管理',
+      '計画立案': 'プロジェクト管理',
+      '組織化': 'プロジェクト管理',
+      'コミュニケーション': 'コミュニケーション',
+      'チームビルディング': 'コミュニケーション',
+      '交渉': 'コミュニケーション',
+      '分析': '分析',
+      '問題解決': '分析',
+      '調査': '分析',
+      '構造化思考': '分析',
+      '創造性': '創造性',
+      'デザイン': '創造性',
+      'イノベーション': '創造性',
+      'リーダーシップ': 'リーダーシップ',
+    };
+    
+    // MBTIタイプに基づいた基本値の設定
+    if (member.mbtiType) {
+      const firstLetter = member.mbtiType[0];
+      const secondLetter = member.mbtiType[1];
+      const thirdLetter = member.mbtiType[2];
+      const fourthLetter = member.mbtiType[3];
+      
+      // E/Iの特性
+      if (firstLetter === 'E') {
+        categories['コミュニケーション'] += 3;
+        categories['リーダーシップ'] += 2;
+      } else {
+        categories['分析'] += 2;
+        categories['プログラミング'] += 1;
+      }
+      
+      // S/Nの特性
+      if (secondLetter === 'S') {
+        categories['プロジェクト管理'] += 3;
+        categories['プログラミング'] += 1;
+      } else {
+        categories['創造性'] += 3;
+        categories['分析'] += 1;
+      }
+      
+      // T/Fの特性
+      if (thirdLetter === 'T') {
+        categories['分析'] += 3;
+        categories['プログラミング'] += 2;
+      } else {
+        categories['コミュニケーション'] += 3;
+        categories['創造性'] += 1;
+      }
+      
+      // J/Pの特性
+      if (fourthLetter === 'J') {
+        categories['プロジェクト管理'] += 3;
+        categories['リーダーシップ'] += 1;
+      } else {
+        categories['創造性'] += 2;
+        categories['コミュニケーション'] += 1;
+      }
+    }
+    
+    // 役割に基づいた追加ポイント
+    if (member.role) {
+      switch (member.role) {
+        case 'リーダー':
+        case 'プロジェクトマネージャー':
+          categories['リーダーシップ'] += 3;
+          categories['プロジェクト管理'] += 2;
+          break;
+        case 'エンジニア':
+        case '開発者':
+        case 'テスター':
+          categories['プログラミング'] += 3;
+          categories['分析'] += 2;
+          break;
+        case 'アナリスト':
+        case 'システムアナリスト':
+          categories['分析'] += 3;
+          categories['プログラミング'] += 1;
+          break;
+        case 'デザイナー':
+          categories['創造性'] += 3;
+          categories['デザイン'] += 2;
+          break;
+        case 'コミュニケーター':
+        case 'マーケティングディレクター':
+          categories['コミュニケーション'] += 3;
+          categories['創造性'] += 1;
+          break;
+      }
+    }
+    
+    // メンバーのスキルに基づいたポイントを追加
+    if (member.skills && Array.isArray(member.skills)) {
+      member.skills.forEach(skill => {
+        const category = skillCategoryMap[skill];
+        if (category && categories[category] !== undefined) {
+          categories[category] += 2;
+        }
+      });
+    }
+    
+    // 最大値を10に制限
+    Object.keys(categories).forEach(key => {
+      const typedKey = key as keyof typeof categories;
+      if (categories[typedKey] > 10) {
+        categories[typedKey] = 10;
+      }
+    });
+    
+    // レーダーチャート用にデータを整形
+    return Object.entries(categories).map(([category, value]) => ({
+      category,
+      value,
+      fullMark: 10
+    }));
+  };
+  
+  // チームスキル分布データの準備
+  const prepareTeamSkillsData = () => {
+    const skillDistribution = calculateSkillDistribution();
+    return skillDistribution.slice(0, 8); // 上位8つのスキルを表示
+  };
+  
   const teamStrengths = getTeamStrengths();
   const teamChallenges = getTeamChallenges();
+  const skillsBasedStrengths = getSkillsBasedStrengths();
   
   return (
     <section className="py-4">
