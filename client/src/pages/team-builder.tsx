@@ -92,27 +92,43 @@ export default function TeamBuilder() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
     {
       id: 1,
-      username: "田中 陽子",
+      username: "山田 拓也",
       mbtiType: "ENTJ",
       selected: true,
       role: "プロジェクトマネージャー",
-      skills: ["プロジェクト管理", "リーダーシップ"]
+      skills: ["プロジェクト管理", "リーダーシップ", "コミュニケーション", "計画立案"]
     },
     {
       id: 2,
       username: "鈴木 健太",
-      mbtiType: "INTP",
+      mbtiType: "INTJ",
       selected: true,
-      role: "システムアナリスト",
-      skills: ["分析", "問題解決", "技術開発"]
+      role: "アーキテクト",
+      skills: ["システム設計", "技術開発", "構造化思考", "問題解決"]
     },
     {
       id: 3,
       username: "佐藤 美咲",
-      mbtiType: "ENFJ",
+      mbtiType: "ENFP",
       selected: true,
-      role: "マーケティングディレクター",
-      skills: ["コミュニケーション", "チームビルディング"]
+      role: "デザイナー",
+      skills: ["デザイン", "創造性", "コミュニケーション", "ユーザー体験"]
+    },
+    {
+      id: 4,
+      username: "高橋 直樹",
+      mbtiType: "ISTP",
+      selected: true,
+      role: "開発者",
+      skills: ["プログラミング", "問題解決", "技術開発", "デバッグ"]
+    },
+    {
+      id: 5,
+      username: "中村 綾子",
+      mbtiType: "ISTJ",
+      selected: true,
+      role: "テスター",
+      skills: ["品質保証", "組織化", "文書作成", "分析"]
     }
   ]);
   const [newMember, setNewMember] = useState({
