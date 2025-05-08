@@ -1024,7 +1024,7 @@ export default function TeamBuilder() {
               </div>
               
               {/* メンバーごとのスキル分析 */}
-              <div className="mb-8">
+              <div className="mt-12 mb-8">
                 <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-purple-600">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -1032,6 +1032,9 @@ export default function TeamBuilder() {
                   </svg>
                   メンバー別能力分析
                 </h3>
+                <p className="text-sm text-gray-600 mb-6">
+                  各メンバーの強み・特徴をMBTIタイプとスキルから算出し、レーダーチャートで視覚化しています。チャートの形状からどのような領域に強みがあるか確認できます。
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {selectedMembers.map((member) => (
                     <Card key={member.id} className="shadow-md rounded-lg p-6 border-border/60">
@@ -1119,6 +1122,9 @@ export default function TeamBuilder() {
                     </svg>
                     チームスキル分析
                   </h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    チーム全体のスキル分布と、それに基づく強みを分析しています。左側のグラフはチーム内で共有されているスキルの割合を示し、右側ではその結果判明したチームとしての強みを説明しています。
+                  </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* チームスキル分布 */}
