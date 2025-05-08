@@ -56,23 +56,23 @@ export function MainNavigation() {
   
   return (
     <nav className="bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between h-12">
-          <div className="flex space-x-2 lg:space-x-8 overflow-x-auto">
+          <div className="flex space-x-1 sm:space-x-3 lg:space-x-6 overflow-x-auto scrollbar-hide w-full">
             {navigationItems.map((item) => {
               const isActive = location === item.path;
               return (
                 <Link 
                   key={item.path}
                   href={item.path}
-                  className={`inline-flex items-center px-3 py-2 text-sm font-medium transition-colors
+                  className={`inline-flex items-center px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-colors whitespace-nowrap
                     ${isActive
                       ? "text-primary border-b-2 border-primary"
                       : "text-muted-foreground hover:text-foreground"
                     }`}
                 >
-                  {item.icon}
-                  {item.label}
+                  <span className="mr-1 sm:mr-2">{item.icon}</span>
+                  <span>{item.label}</span>
                 </Link>
               );
             })}

@@ -1403,10 +1403,10 @@ export default function TeamBuilder() {
               </div>
               
               {/* エンジニアリングコンテキスト特化の分析 */}
-              <div className="mt-12 mb-8">
-                <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-purple-600">
+              <div className="mt-10 sm:mt-12 mb-6 sm:mb-8">
+                <Card className="shadow-md rounded-lg p-4 sm:p-6">
+                  <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4 flex items-center">
+                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
                       <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
                       <path d="M2 2l7.586 7.586"></path>
@@ -1414,11 +1414,11 @@ export default function TeamBuilder() {
                     </svg>
                     開発フェーズ別適性分析
                   </h3>
-                  <p className="text-sm text-gray-600 mb-6">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
                     チームメンバーのMBTIタイプとスキルを分析し、各開発フェーズにおける強みと課題を評価しています。各フェーズに対する適性度を確認できます。
                   </p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 pb-2">
                     {DEVELOPMENT_PHASES.map((phase) => {
                       // このフェーズに適したMBTIタイプを持つメンバーの数をカウント
                       const suitableMembers = selectedMembers.filter(member => 
@@ -1440,21 +1440,21 @@ export default function TeamBuilder() {
                       }
                       
                       return (
-                        <div key={phase.id} className={`border rounded-lg p-4 ${colorClass}`}>
-                          <h4 className="text-sm font-semibold mb-2">{phase.name}</h4>
-                          <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                        <div key={phase.id} className={`border rounded-lg p-3 sm:p-4 ${colorClass}`}>
+                          <h4 className="text-xs sm:text-sm font-semibold mb-2 leading-tight">{phase.name}</h4>
+                          <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2 mb-2 sm:mb-3">
                             <div 
-                              className={`h-2 rounded-full ${suitabilityPercentage >= 70 ? 'bg-green-600' : suitabilityPercentage >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                              className={`h-1.5 sm:h-2 rounded-full ${suitabilityPercentage >= 70 ? 'bg-green-600' : suitabilityPercentage >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
                               style={{ width: `${suitabilityPercentage}%` }}
                             ></div>
                           </div>
-                          <p className="text-xs">{suitabilityPercentage}% 適合</p>
+                          <p className="text-[10px] sm:text-xs">{suitabilityPercentage}% 適合</p>
                           
-                          <div className="mt-3">
-                            <p className="text-xs text-gray-600 mb-1">推奨スキル:</p>
+                          <div className="mt-2 sm:mt-3">
+                            <p className="text-[10px] sm:text-xs text-gray-600 mb-1">推奨スキル:</p>
                             <div className="flex flex-wrap gap-1">
                               {phase.keySkills.slice(0, 3).map((skill, index) => (
-                                <span key={index} className="text-xs px-2 py-0.5 bg-white/70 rounded-full">
+                                <span key={index} className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-white/70 rounded-full truncate">
                                   {skill}
                                 </span>
                               ))}
