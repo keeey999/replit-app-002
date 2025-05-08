@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -16,6 +16,21 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { getCompatibility, getCompatibilityColorClass } from "@/lib/constants";
+import { 
+  RadarChart, 
+  PolarGrid, 
+  PolarAngleAxis, 
+  PolarRadiusAxis, 
+  Radar, 
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid
+} from "recharts";
 
 // 役割とスキルの選択肢
 const ROLE_OPTIONS = [
@@ -62,7 +77,7 @@ interface TeamMember {
   mbtiType: string;
   selected: boolean;
   role?: string;
-  skills?: string;
+  skills?: string[];
 }
 
 export default function TeamBuilder() {
@@ -76,7 +91,7 @@ export default function TeamBuilder() {
       mbtiType: "ENTJ",
       selected: true,
       role: "プロジェクトマネージャー",
-      skills: "プロジェクト管理, リーダーシップ"
+      skills: ["プロジェクト管理", "リーダーシップ"]
     },
     {
       id: 2,
@@ -84,7 +99,7 @@ export default function TeamBuilder() {
       mbtiType: "INTP",
       selected: true,
       role: "システムアナリスト",
-      skills: "分析, 問題解決, 技術開発"
+      skills: ["分析", "問題解決", "技術開発"]
     },
     {
       id: 3,
@@ -92,15 +107,16 @@ export default function TeamBuilder() {
       mbtiType: "ENFJ",
       selected: true,
       role: "マーケティングディレクター",
-      skills: "コミュニケーション, チームビルディング"
+      skills: ["コミュニケーション", "チームビルディング"]
     }
   ]);
   const [newMember, setNewMember] = useState({
     name: "",
     mbtiType: "",
     role: "",
-    skills: ""
+    skills: [] as string[]
   });
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   
   // メンバー削除機能
   const handleDeleteMember = (memberId: number) => {
@@ -122,6 +138,33 @@ export default function TeamBuilder() {
     );
   };
   
+  // スキルのトグル
+  const toggleSkill = (skill: string) => {
+    if (selectedSkills.includes(skill)) {
+      setSelectedSkills(prev => prev.filter(s => s !== skill));
+    } else {
+      setSelectedSkills(prev => [...prev, skill]);
+    }
+  };
+  
+  // スキル一覧をクリア
+  const clearSelectedSkills = () => {
+    setSelectedSkills([]);
+  };
+  
+  // スキルが選択されているか確認
+  const isSkillSelected = (skill: string) => {
+    return selectedSkills.includes(skill);
+  };
+  
+  // 選択されたスキルをメンバーに設定
+  useEffect(() => {
+    setNewMember(prev => ({
+      ...prev,
+      skills: selectedSkills
+    }));
+  }, [selectedSkills]);
+  
   const handleAddNewMember = () => {
     const newId = Math.max(...teamMembers.map(m => m.id), 0) + 1;
     const member: TeamMember = {
@@ -139,8 +182,9 @@ export default function TeamBuilder() {
       name: "",
       mbtiType: "",
       role: "",
-      skills: ""
+      skills: []
     });
+    setSelectedSkills([]);
     
     toast({
       title: "メンバーが追加されました",
@@ -821,20 +865,39 @@ export default function TeamBuilder() {
                 </div>
                 
                 <div className="grid gap-2">
-                  <Label htmlFor="skills">スキル・強み</Label>
-                  <Select
-                    value={newMember.skills}
-                    onValueChange={(value) => setNewMember(prev => ({ ...prev, skills: value }))}
-                  >
-                    <SelectTrigger id="skills">
-                      <SelectValue placeholder="スキルを選択" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SKILL_OPTIONS.map((skill) => (
-                        <SelectItem key={skill} value={skill}>{skill}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="skills">スキル・強み（複数選択可）</Label>
+                  <div className="border p-3 rounded-md h-40 overflow-y-auto grid grid-cols-2 gap-2">
+                    {SKILL_OPTIONS.map((skill) => (
+                      <div key={skill} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`skill-${skill}`} 
+                          checked={isSkillSelected(skill)}
+                          onCheckedChange={() => toggleSkill(skill)}
+                        />
+                        <label 
+                          htmlFor={`skill-${skill}`}
+                          className="text-sm font-medium leading-none cursor-pointer"
+                        >
+                          {skill}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {selectedSkills.length === 0 ? 'スキルが選択されていません' : `${selectedSkills.length}個のスキルが選択されました`}
+                    </span>
+                    {selectedSkills.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={clearSelectedSkills}
+                      >
+                        クリア
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
               
