@@ -433,19 +433,24 @@ export default function TeamBuilder() {
             
             <TabsContent value="setup" className="mt-6">
               {/* Team Members Selection */}
-              <Card className="shadow-md rounded-lg p-6">
+              <Card className="shadow-md rounded-lg p-6 border-border/60">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium gradient-text">チームメンバー選択</h3>
+                  <h3 className="text-lg font-medium gradient-text flex items-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-primary">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    チームメンバー選択
+                  </h3>
                   <Button 
-                    variant="ghost" 
-                    className="text-primary hover:text-primary/80 flex items-center"
+                    variant="outline" 
+                    className="bg-primary/5 border-primary/20 hover:bg-primary/10 text-primary flex items-center"
                     onClick={() => setShowAddMemberDialog(true)}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="8.5" cy="7" r="4"></circle>
-                      <line x1="20" y1="8" x2="20" y2="14"></line>
-                      <line x1="23" y1="11" x2="17" y2="11"></line>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                      <path d="M12 5v14M5 12h14"></path>
                     </svg>
                     メンバー追加
                   </Button>
@@ -516,7 +521,13 @@ export default function TeamBuilder() {
                 </div>
                 
                 <div className="mt-6 flex justify-center">
-                  <Button onClick={handleAnalyzeTeam}>
+                  <Button onClick={handleAnalyzeTeam} className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <path d="M3 3v18h18"></path>
+                      <path d="M18 17V9"></path>
+                      <path d="M13 17V5"></path>
+                      <path d="M8 17v-3"></path>
+                    </svg>
                     チームを分析する
                   </Button>
                 </div>
@@ -526,7 +537,7 @@ export default function TeamBuilder() {
             <TabsContent value="analysis" className="mt-6">
               {/* Team Composition Overview */}
               <Card className="shadow-md rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">チーム構成概要</h3>
+                <h3 className="text-lg font-medium gradient-text mb-4">チーム構成概要</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Team Members */}
@@ -625,7 +636,7 @@ export default function TeamBuilder() {
               
               {/* Team Compatibility Matrix */}
               <Card className="shadow-md rounded-lg p-6 mb-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">チーム相性マトリックス</h3>
+                <h3 className="text-lg font-medium gradient-text mb-4">チーム相性マトリックス</h3>
                 
                 <div className="overflow-x-auto">
                   <table className="min-w-full">
@@ -675,7 +686,13 @@ export default function TeamBuilder() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Strengths */}
                 <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-green-600 mb-4">チームの強み</h3>
+                  <h3 className="text-lg font-medium gradient-text-accent mb-4 flex items-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-green-600">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    チームの強み
+                  </h3>
                   {teamStrengths.length > 0 ? (
                     <ul className="space-y-4">
                       {teamStrengths.map((strength) => (
@@ -697,7 +714,14 @@ export default function TeamBuilder() {
                 
                 {/* Challenges */}
                 <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-red-600 mb-4">チームの課題</h3>
+                  <h3 className="text-lg font-medium gradient-text-accent mb-4 flex items-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-red-500">
+                      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <line x1="12" y1="9" x2="12" y2="13"></line>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    チームの課題
+                  </h3>
                   {teamChallenges.length > 0 ? (
                     <ul className="space-y-4">
                       {teamChallenges.map((challenge) => (
@@ -723,7 +747,14 @@ export default function TeamBuilder() {
               </div>
               
               <div className="mt-8 flex justify-center">
-                <Button onClick={() => setActiveTab("setup")}>
+                <Button 
+                  onClick={() => setActiveTab("setup")}
+                  variant="outline"
+                  className="border-primary/20 hover:bg-primary/5"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
                   チーム編成に戻る
                 </Button>
               </div>
@@ -734,7 +765,15 @@ export default function TeamBuilder() {
           <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>新しいメンバーを追加</DialogTitle>
+                <DialogTitle className="flex items-center">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-primary">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                  </svg>
+                  新しいメンバーを追加
+                </DialogTitle>
               </DialogHeader>
               
               <div className="grid gap-4 py-4">
@@ -800,8 +839,16 @@ export default function TeamBuilder() {
               </div>
               
               <DialogFooter>
-                <Button type="submit" onClick={handleAddNewMember} disabled={!newMember.name || !newMember.mbtiType}>
-                  追加
+                <Button 
+                  type="submit" 
+                  onClick={handleAddNewMember} 
+                  disabled={!newMember.name || !newMember.mbtiType}
+                  className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                    <path d="M12 5v14M5 12h14"></path>
+                  </svg>
+                  メンバーを追加
                 </Button>
               </DialogFooter>
             </DialogContent>
