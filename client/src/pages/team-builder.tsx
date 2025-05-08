@@ -402,22 +402,40 @@ export default function TeamBuilder() {
   const teamChallenges = getTeamChallenges();
   
   return (
-    <section className="py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-4">
+      <div className="w-full">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">チーム編成と分析</h2>
+          <h2 className="text-3xl font-bold gradient-text text-center mb-8">
+            エンジニアチーム分析 <span className="text-sm font-medium text-muted-foreground ml-2">Powered by MBTI</span>
+          </h2>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="setup">チームメンバー</TabsTrigger>
-              <TabsTrigger value="analysis">チーム分析</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+              <TabsTrigger value="setup" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                チームメンバー
+              </TabsTrigger>
+              <TabsTrigger value="analysis" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M3 3v18h18"></path>
+                  <path d="M18 17V9"></path>
+                  <path d="M13 17V5"></path>
+                  <path d="M8 17v-3"></path>
+                </svg>
+                チーム分析
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="setup" className="mt-6">
               {/* Team Members Selection */}
               <Card className="shadow-md rounded-lg p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">チームメンバー選択</h3>
+                  <h3 className="text-lg font-medium gradient-text">チームメンバー選択</h3>
                   <Button 
                     variant="ghost" 
                     className="text-primary hover:text-primary/80 flex items-center"
