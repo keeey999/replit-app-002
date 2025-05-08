@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 
 interface NavigationItem {
@@ -10,8 +9,7 @@ const navigationItems: NavigationItem[] = [
   { path: "/", label: "ホーム" },
   { path: "/mbti-types", label: "MBTIタイプ" },
   { path: "/test", label: "診断テスト" },
-  { path: "/team-builder", label: "チーム編成" },
-  { path: "/team-analysis", label: "チーム分析" },
+  { path: "/team-builder", label: "チーム編成・分析" },
 ];
 
 export function MainNavigation() {

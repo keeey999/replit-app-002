@@ -8,7 +8,6 @@ import Home from "@/pages/home";
 import MbtiTypes from "@/pages/mbti-types";
 import Test from "@/pages/test";
 import TeamBuilder from "@/pages/team-builder";
-import TeamAnalysis from "@/pages/team-analysis";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,7 +17,6 @@ function Router() {
       <Route path="/mbti-types" component={MbtiTypes} />
       <Route path="/test" component={Test} />
       <Route path="/team-builder" component={TeamBuilder} />
-      <Route path="/team-analysis" component={TeamAnalysis} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
