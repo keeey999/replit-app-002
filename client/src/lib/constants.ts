@@ -415,6 +415,146 @@ export const TEAM_DURATION_OPTIONS = [
   "継続的"
 ];
 
+// プロジェクトタイプ定義
+export interface ProjectType {
+  id: string;
+  name: string;
+  description: string;
+  idealMbtiDistribution: {
+    E?: number; // 0-100の割合で推奨値を表す
+    I?: number;
+    S?: number;
+    N?: number;
+    T?: number;
+    F?: number;
+    J?: number;
+    P?: number;
+  };
+  recommendedRoles: string[];
+  keySkills: string[];
+  challengeAreas: string[];
+}
+
+export const PROJECT_TYPES: ProjectType[] = [
+  {
+    id: "new-development",
+    name: "新規開発プロジェクト",
+    description: "新しいプロダクトやサービスを最初から開発するプロジェクト。創造性と革新性が求められます。",
+    idealMbtiDistribution: {
+      E: 40, I: 60,
+      S: 30, N: 70,
+      T: 60, F: 40,
+      J: 50, P: 50
+    },
+    recommendedRoles: ["アーキテクト", "フロントエンド開発者", "バックエンド開発者", "デザイナー", "プロジェクトマネージャー"],
+    keySkills: ["プログラミング", "システム設計", "デザイン思考", "問題解決能力", "創造的思考"],
+    challengeAreas: ["スコープ管理", "技術選定", "チーム連携", "不確実性への対応"]
+  },
+  {
+    id: "maintenance",
+    name: "保守運用プロジェクト",
+    description: "既存システムの安定稼働を維持し、必要に応じて改善を行うプロジェクト。正確性と信頼性が重要です。",
+    idealMbtiDistribution: {
+      E: 30, I: 70,
+      S: 70, N: 30,
+      T: 70, F: 30,
+      J: 70, P: 30
+    },
+    recommendedRoles: ["SRE", "運用エンジニア", "QAエンジニア", "セキュリティスペシャリスト", "テクニカルサポート"],
+    keySkills: ["トラブルシューティング", "モニタリング", "パフォーマンスチューニング", "ドキュメンテーション", "セキュリティ対策"],
+    challengeAreas: ["レガシーシステム対応", "無停止運用", "変更管理", "技術的負債"]
+  },
+  {
+    id: "research",
+    name: "研究開発プロジェクト",
+    description: "新技術の調査や実験的な取り組みを行うプロジェクト。学習能力と探究心が求められます。",
+    idealMbtiDistribution: {
+      E: 30, I: 70,
+      S: 20, N: 80,
+      T: 80, F: 20,
+      J: 40, P: 60
+    },
+    recommendedRoles: ["研究者", "プロトタイプ開発者", "データサイエンティスト", "コンサルタント", "テクニカルライター"],
+    keySkills: ["データ分析", "調査能力", "実験設計", "抽象思考", "学術的文章作成"],
+    challengeAreas: ["成果の不確実性", "長期的視点の維持", "実用化への橋渡し", "リソース確保"]
+  },
+  {
+    id: "agile-scrum",
+    name: "アジャイル/スクラム開発",
+    description: "反復的な開発と継続的なフィードバックを重視する開発手法。適応力とコミュニケーション能力が重要です。",
+    idealMbtiDistribution: {
+      E: 60, I: 40,
+      S: 40, N: 60,
+      T: 50, F: 50,
+      J: 40, P: 60
+    },
+    recommendedRoles: ["スクラムマスター", "プロダクトオーナー", "開発者", "UXデザイナー", "テスター"],
+    keySkills: ["アジャイル手法", "コミュニケーション", "自己管理", "適応力", "フィードバック対応"],
+    challengeAreas: ["スプリント管理", "要件の変化", "チーム自律性", "品質保証"]
+  },
+  {
+    id: "integration",
+    name: "システム統合プロジェクト",
+    description: "複数のシステムやサービスを連携させるプロジェクト。全体最適化と技術的な整合性が求められます。",
+    idealMbtiDistribution: {
+      E: 50, I: 50,
+      S: 60, N: 40,
+      T: 80, F: 20,
+      J: 70, P: 30
+    },
+    recommendedRoles: ["インテグレーションスペシャリスト", "アーキテクト", "APIエンジニア", "テスト自動化エンジニア", "プロジェクトマネージャー"],
+    keySkills: ["システム間連携", "API設計", "データ変換", "テスト自動化", "ドキュメンテーション"],
+    challengeAreas: ["複雑性管理", "技術的ギャップ", "性能最適化", "異種システム間の調整"]
+  }
+];
+
+// 開発フェーズ定義
+export interface DevelopmentPhase {
+  id: string;
+  name: string;
+  description: string;
+  recommendedMbtiTypes: string[];
+  keySkills: string[];
+}
+
+export const DEVELOPMENT_PHASES: DevelopmentPhase[] = [
+  {
+    id: "planning",
+    name: "要件定義・計画段階",
+    description: "プロジェクトの目標設定や要件の洗い出し、計画立案を行う段階。",
+    recommendedMbtiTypes: ["INTJ", "ENTJ", "INFJ", "ENFJ", "ISTJ", "ESTJ"],
+    keySkills: ["ヒアリング", "分析", "文書化", "プロジェクト管理", "コミュニケーション"]
+  },
+  {
+    id: "design",
+    name: "設計段階",
+    description: "システムアーキテクチャやユーザーインターフェースなどの設計を行う段階。",
+    recommendedMbtiTypes: ["INTJ", "INTP", "ENTP", "INFJ", "INFP"],
+    keySkills: ["システム設計", "UI/UXデザイン", "データモデリング", "アーキテクチャ構築", "創造的思考"]
+  },
+  {
+    id: "development",
+    name: "実装段階",
+    description: "設計に基づいて実際にコーディングやシステム構築を行う段階。",
+    recommendedMbtiTypes: ["INTP", "ISTP", "ESTP", "ISFP", "ENTP"],
+    keySkills: ["プログラミング", "デバッグ", "コード最適化", "バージョン管理", "技術的問題解決"]
+  },
+  {
+    id: "testing",
+    name: "テスト段階",
+    description: "開発したシステムの品質確認や不具合の検出・修正を行う段階。",
+    recommendedMbtiTypes: ["ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP"],
+    keySkills: ["テスト設計", "品質保証", "バグ報告", "エラー分析", "注意深さ"]
+  },
+  {
+    id: "deployment",
+    name: "リリース・運用段階",
+    description: "システムのデプロイや運用、保守を行う段階。",
+    recommendedMbtiTypes: ["ISTJ", "ESTJ", "ISFJ", "ESFJ", "ISTP"],
+    keySkills: ["デプロイメント", "運用監視", "トラブルシューティング", "ドキュメンテーション", "ユーザーサポート"]
+  }
+];
+
 // MBTI相性マトリックス (簡易版)
 // 値: "良好" | "普通" | "要注意"
 export const MBTI_COMPATIBILITY: Record<string, Record<string, string>> = {

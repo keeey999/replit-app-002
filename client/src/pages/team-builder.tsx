@@ -15,7 +15,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { getCompatibility, getCompatibilityColorClass } from "@/lib/constants";
+import { 
+  getCompatibility, 
+  getCompatibilityColorClass, 
+  PROJECT_TYPES,
+  DEVELOPMENT_PHASES
+} from "@/lib/constants";
 import { 
   RadarChart, 
   PolarGrid, 
@@ -145,6 +150,362 @@ export default function TeamBuilder() {
     } else {
       setSelectedSkills(prev => [...prev, skill]);
     }
+  };
+  
+  // 新しく追加される関数群
+  // チームの強みフェーズを取得
+  const getTeamStrengthPhase = () => {
+    if (selectedMembers.length === 0) return "不明";
+    
+    // 各フェーズの適合度を計算
+    const phaseScores = DEVELOPMENT_PHASES.map(phase => {
+      const suitableMembers = selectedMembers.filter(member => 
+        phase.recommendedMbtiTypes.includes(member.mbtiType)
+      );
+      return {
+        id: phase.id,
+        name: phase.name,
+        score: suitableMembers.length / selectedMembers.length
+      };
+    });
+    
+    // 最も高いスコアのフェーズを返す
+    const bestPhase = phaseScores.reduce((prev, current) => 
+      current.score > prev.score ? current : prev, 
+      phaseScores[0]
+    );
+    
+    return bestPhase.name;
+  };
+  
+  // MBTI分布とプロジェクトの理想分布間のギャップを計算
+  const calculateMbtiGap = (
+    actualDistribution: ReturnType<typeof calculateMbtiDistribution>, 
+    idealDistribution: any
+  ) => {
+    let totalGap = 0;
+    let factorsCount = 0;
+    
+    // E vs I ギャップ
+    if (idealDistribution.E && idealDistribution.I) {
+      const totalMembers = actualDistribution.eVsI.E + actualDistribution.eVsI.I;
+      if (totalMembers > 0) {
+        const actualEPercentage = (actualDistribution.eVsI.E / totalMembers) * 100;
+        const gapE = Math.abs(actualEPercentage - idealDistribution.E);
+        totalGap += gapE;
+        factorsCount++;
+      }
+    }
+    
+    // S vs N ギャップ
+    if (idealDistribution.S && idealDistribution.N) {
+      const totalMembers = actualDistribution.sVsN.S + actualDistribution.sVsN.N;
+      if (totalMembers > 0) {
+        const actualSPercentage = (actualDistribution.sVsN.S / totalMembers) * 100;
+        const gapS = Math.abs(actualSPercentage - idealDistribution.S);
+        totalGap += gapS;
+        factorsCount++;
+      }
+    }
+    
+    // T vs F ギャップ
+    if (idealDistribution.T && idealDistribution.F) {
+      const totalMembers = actualDistribution.tVsF.T + actualDistribution.tVsF.F;
+      if (totalMembers > 0) {
+        const actualTPercentage = (actualDistribution.tVsF.T / totalMembers) * 100;
+        const gapT = Math.abs(actualTPercentage - idealDistribution.T);
+        totalGap += gapT;
+        factorsCount++;
+      }
+    }
+    
+    // J vs P ギャップ
+    if (idealDistribution.J && idealDistribution.P) {
+      const totalMembers = actualDistribution.jVsP.J + actualDistribution.jVsP.P;
+      if (totalMembers > 0) {
+        const actualJPercentage = (actualDistribution.jVsP.J / totalMembers) * 100;
+        const gapJ = Math.abs(actualJPercentage - idealDistribution.J);
+        totalGap += gapJ;
+        factorsCount++;
+      }
+    }
+    
+    // 平均ギャップを返す (0-100 の値)
+    return factorsCount > 0 ? totalGap / factorsCount : 0;
+  };
+  
+  // スキルギャップを計算 (理想的なスキルセットとの差)
+  const calculateSkillGap = (members: TeamMember[], requiredSkills: string[]) => {
+    if (members.length === 0 || requiredSkills.length === 0) return 100; // 最大ギャップ
+    
+    // チーム内の全スキルを集計
+    const teamSkills = new Set<string>();
+    members.forEach(member => {
+      if (member.skills && Array.isArray(member.skills)) {
+        member.skills.forEach(skill => teamSkills.add(skill));
+      }
+    });
+    
+    // カバーされているスキルの割合を計算
+    const coveredSkills = requiredSkills.filter(skill => 
+      teamSkills.has(skill) || Array.from(teamSkills).some(s => 
+        s.toLowerCase().includes(skill.toLowerCase()) || 
+        skill.toLowerCase().includes(s.toLowerCase())
+      )
+    );
+    
+    // スキルギャップを計算 (0-100 の値)
+    return 100 - (coveredSkills.length / requiredSkills.length) * 100;
+  };
+  
+  // プロジェクト適合度に応じた色クラスを取得
+  const getProjectFitColorClass = (percentage: number) => {
+    if (percentage >= 70) return "text-green-600";
+    if (percentage >= 40) return "text-yellow-600";
+    return "text-red-600";
+  };
+  
+  // プロジェクト適合度に応じたグラデーションクラスを取得
+  const getProjectFitGradient = (percentage: number) => {
+    if (percentage >= 70) return "bg-gradient-to-r from-green-400 to-green-600";
+    if (percentage >= 40) return "bg-gradient-to-r from-yellow-400 to-yellow-600";
+    return "bg-gradient-to-r from-red-400 to-red-600";
+  };
+  
+  // チームが特定の役割を持っているか確認
+  const hasRoleInTeam = (role: string) => {
+    return selectedMembers.some(member => 
+      member.role === role || 
+      (member.role && member.role.toLowerCase().includes(role.toLowerCase()))
+    );
+  };
+  
+  // チームが特定のスキルを持っているか確認
+  const hasSkillInTeam = (skill: string) => {
+    return selectedMembers.some(member => 
+      member.skills && Array.isArray(member.skills) && (
+        member.skills.includes(skill) || 
+        member.skills.some(s => s.toLowerCase().includes(skill.toLowerCase()))
+      )
+    );
+  };
+  
+  // ギャップ分析に基づいた推奨事項を取得
+  const getBestRecommendation = (projectType: any) => {
+    if (selectedMembers.length === 0) {
+      return <p className="text-sm text-gray-500">チームメンバーが選択されていないため、分析できません。</p>;
+    }
+    
+    // 足りない役割を検出
+    const missingRoles = projectType.recommendedRoles.filter(role => !hasRoleInTeam(role));
+    
+    // 足りないスキルを検出
+    const missingSkills = projectType.keySkills.filter(skill => !hasSkillInTeam(skill));
+    
+    // MBTI分布の最適化提案
+    const mbtiSuggestion = getMbtiBalanceSuggestion(mbtiDistribution, projectType.idealMbtiDistribution);
+    
+    return (
+      <div className="space-y-2 text-sm">
+        {missingRoles.length > 0 && (
+          <p>
+            <span className="font-medium">不足している役割: </span>
+            {missingRoles.join('、')}
+          </p>
+        )}
+        
+        {missingSkills.length > 0 && (
+          <p>
+            <span className="font-medium">不足しているスキル: </span>
+            {missingSkills.join('、')}
+          </p>
+        )}
+        
+        {mbtiSuggestion && (
+          <p>
+            <span className="font-medium">MBTI推奨: </span>
+            {mbtiSuggestion}
+          </p>
+        )}
+        
+        {missingRoles.length === 0 && missingSkills.length === 0 && !mbtiSuggestion && (
+          <p className="text-green-600">
+            このプロジェクトに適したバランスの取れたチーム構成です！
+          </p>
+        )}
+      </div>
+    );
+  };
+  
+  // MBTI分布の最適化提案を取得
+  const getMbtiBalanceSuggestion = (
+    actual: ReturnType<typeof calculateMbtiDistribution>, 
+    ideal: any
+  ) => {
+    if (!ideal) return null;
+    
+    const suggestions = [];
+    
+    // E vs I バランス
+    const totalEI = actual.eVsI.E + actual.eVsI.I;
+    if (totalEI > 0) {
+      const actualEPercentage = (actual.eVsI.E / totalEI) * 100;
+      if (ideal.E && Math.abs(actualEPercentage - ideal.E) > 20) {
+        if (actualEPercentage < ideal.E) {
+          suggestions.push("もっと外向的(E)なメンバーを追加すると良いでしょう");
+        } else {
+          suggestions.push("もっと内向的(I)なメンバーを追加すると良いでしょう");
+        }
+      }
+    }
+    
+    // S vs N バランス
+    const totalSN = actual.sVsN.S + actual.sVsN.N;
+    if (totalSN > 0) {
+      const actualSPercentage = (actual.sVsN.S / totalSN) * 100;
+      if (ideal.S && Math.abs(actualSPercentage - ideal.S) > 20) {
+        if (actualSPercentage < ideal.S) {
+          suggestions.push("もっと現実的(S)なメンバーを追加すると良いでしょう");
+        } else {
+          suggestions.push("もっと直感的(N)なメンバーを追加すると良いでしょう");
+        }
+      }
+    }
+    
+    // 最大2つの提案に制限
+    if (suggestions.length > 0) {
+      return suggestions.slice(0, 2).join('、また');
+    }
+    return null;
+  };
+  
+  // チーム全体のレーダーチャートデータを取得
+  const getTeamRadarData = () => {
+    if (selectedMembers.length === 0) return [];
+    
+    const axes = [
+      { axis: "分析力", key: "analysis" },
+      { axis: "創造性", key: "creativity" },
+      { axis: "リーダーシップ", key: "leadership" },
+      { axis: "実行力", key: "execution" },
+      { axis: "協調性", key: "harmony" },
+      { axis: "細部への配慮", key: "detail" }
+    ];
+    
+    // 各能力の評価を MBTI タイプから計算
+    const calculateMbtiAxisValue = (members: TeamMember[], axisKey: string) => {
+      let value = 0;
+      
+      members.forEach(member => {
+        const mbti = member.mbtiType;
+        
+        // 各 MBTI タイプと能力の対応付け（スコアは 0-10 の範囲）
+        switch (axisKey) {
+          case "analysis":
+            if (mbti.includes("NT")) value += 8;
+            else if (mbti.includes("ST")) value += 6;
+            else if (mbti.includes("NF")) value += 4;
+            else value += 2;
+            break;
+          case "creativity":
+            if (mbti.includes("NP")) value += 9;
+            else if (mbti.includes("NF")) value += 7;
+            else if (mbti.includes("NT")) value += 6;
+            else value += 3;
+            break;
+          case "leadership":
+            if (mbti.includes("ETJ")) value += 9;
+            else if (mbti.includes("ENJ")) value += 8;
+            else if (mbti.includes("EST")) value += 6;
+            else value += 3;
+            break;
+          case "execution":
+            if (mbti.includes("STJ")) value += 10;
+            else if (mbti.includes("STP")) value += 7;
+            else if (mbti.includes("NTJ")) value += 7;
+            else value += 4;
+            break;
+          case "harmony":
+            if (mbti.includes("FJ")) value += 9;
+            else if (mbti.includes("SF")) value += 8;
+            else if (mbti.includes("NF")) value += 7;
+            else value += 3;
+            break;
+          case "detail":
+            if (mbti.includes("IS")) value += 9;
+            else if (mbti.includes("ES")) value += 7;
+            else if (mbti.includes("IN")) value += 5;
+            else value += 3;
+            break;
+        }
+      });
+      
+      // 平均値を計算し、10を最大値として正規化
+      return Math.min(10, value / members.length);
+    };
+    
+    // 各軸のチーム平均値を計算
+    return axes.map(axis => ({
+      axis: axis.axis,
+      value: calculateMbtiAxisValue(selectedMembers, axis.key)
+    }));
+  };
+  
+  // チーム統合指数を計算（メンバー間の相性と補完性）
+  const getTeamCohesionScore = () => {
+    if (selectedMembers.length < 2) return 0;
+    
+    // メンバー間の相性を評価
+    let compatibilitySum = 0;
+    let compatibilityCount = 0;
+    
+    for (let i = 0; i < selectedMembers.length; i++) {
+      for (let j = i + 1; j < selectedMembers.length; j++) {
+        const compatibility = getCompatibility(
+          selectedMembers[i].mbtiType, 
+          selectedMembers[j].mbtiType
+        );
+        
+        // 相性スコアに変換
+        let compatibilityScore = 0;
+        if (compatibility === "良好") compatibilityScore = 100;
+        else if (compatibility === "普通") compatibilityScore = 60;
+        else if (compatibility === "要注意") compatibilityScore = 30;
+        
+        compatibilitySum += compatibilityScore;
+        compatibilityCount++;
+      }
+    }
+    
+    // 平均相性スコア
+    const avgCompatibility = compatibilityCount > 0 ? 
+      compatibilitySum / compatibilityCount : 0;
+    
+    return Math.round(avgCompatibility);
+  };
+  
+  // チーム多様性指数を計算
+  const getTeamDiversityScore = () => {
+    if (selectedMembers.length === 0) return 0;
+    
+    // MBTI タイプの多様性（ユニークなタイプの数）
+    const uniqueTypes = new Set(selectedMembers.map(m => m.mbtiType));
+    const typesDiversity = (uniqueTypes.size / selectedMembers.length) * 100;
+    
+    // スキルの多様性
+    const allSkills = new Set<string>();
+    selectedMembers.forEach(member => {
+      if (member.skills && Array.isArray(member.skills)) {
+        member.skills.forEach(skill => allSkills.add(skill));
+      }
+    });
+    
+    // 平均スキル数と多様性の関係
+    const avgSkillsPerMember = allSkills.size / selectedMembers.length;
+    const skillsDiversity = Math.min(100, avgSkillsPerMember * 20); // 5 or more skills = 100%
+    
+    // 総合多様性スコア（MBTI多様性とスキル多様性の平均）
+    return Math.round((typesDiversity + skillsDiversity) / 2);
   };
   
   // スキル一覧をクリア
@@ -1023,157 +1384,331 @@ export default function TeamBuilder() {
                 </Card>
               </div>
               
-              {/* メンバーごとのスキル分析 */}
+              {/* エンジニアリングコンテキスト特化の分析 */}
               <div className="mt-12 mb-8">
-                <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-purple-600">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-                  </svg>
-                  メンバー別能力分析
-                </h3>
-                <p className="text-sm text-gray-600 mb-6">
-                  各メンバーの強み・特徴をMBTIタイプとスキルから算出し、レーダーチャートで視覚化しています。チャートの形状からどのような領域に強みがあるか確認できます。
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {selectedMembers.map((member) => (
-                    <Card key={member.id} className="shadow-md rounded-lg p-6 border-border/60">
-                      <div className="flex items-center mb-4">
-                        <Avatar className="h-12 w-12 mr-4 bg-primary/10">
-                          <AvatarFallback className={`${getMbtiTypeColorClass(member.mbtiType)}`}>
-                            {getUserInitials(member.username)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="text-md font-medium">{member.username}</h4>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMbtiTypeColorClass(member.mbtiType)}`}>
-                              {member.mbtiType}
-                            </span>
-                            {member.role && (
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleBadgeClass(member.role)}`}>
-                                {member.role}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                <Card className="shadow-md rounded-lg p-6">
+                  <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-purple-600">
+                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                      <path d="M2 2l7.586 7.586"></path>
+                      <circle cx="11" cy="11" r="2"></circle>
+                    </svg>
+                    開発フェーズ別適性分析
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    チームメンバーのMBTIタイプとスキルを分析し、各開発フェーズにおける強みと課題を評価しています。各フェーズに対する適性度を確認できます。
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+                    {DEVELOPMENT_PHASES.map((phase) => {
+                      // このフェーズに適したMBTIタイプを持つメンバーの数をカウント
+                      const suitableMembers = selectedMembers.filter(member => 
+                        phase.recommendedMbtiTypes.includes(member.mbtiType)
+                      );
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="col-span-2 h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={prepareRadarData(member)}>
-                              <PolarGrid />
-                              <PolarAngleAxis dataKey="category" tick={{ fill: '#6b7280', fontSize: 11 }} />
-                              <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                              <Radar
-                                name={member.username}
-                                dataKey="value"
-                                stroke="#8884d8"
-                                fill="#8884d8"
-                                fillOpacity={0.6}
-                              />
-                              <Tooltip />
-                            </RadarChart>
-                          </ResponsiveContainer>
-                        </div>
-                        <div className="col-span-1">
-                          <h5 className="text-sm font-medium mb-2">主要スキル</h5>
-                          <div className="space-y-1">
-                            {member.skills && Array.isArray(member.skills) && member.skills.length > 0 ? (
-                              member.skills.map((skill, index) => (
-                                <div key={index} className="inline-block px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 mr-1 mb-1">
-                                  {skill}
-                                </div>
-                              ))
-                            ) : (
-                              <p className="text-sm text-gray-500">スキル未登録</p>
-                            )}
+                      // 適性度を計算 (0-100%)
+                      const suitabilityPercentage = Math.min(
+                        100, 
+                        Math.round((suitableMembers.length / selectedMembers.length) * 100)
+                      );
+                      
+                      // 適性度に応じたカラークラスを決定
+                      let colorClass = "bg-red-100 border-red-300";
+                      if (suitabilityPercentage >= 70) {
+                        colorClass = "bg-green-100 border-green-300";
+                      } else if (suitabilityPercentage >= 40) {
+                        colorClass = "bg-yellow-100 border-yellow-300";
+                      }
+                      
+                      return (
+                        <div key={phase.id} className={`border rounded-lg p-4 ${colorClass}`}>
+                          <h4 className="text-sm font-semibold mb-2">{phase.name}</h4>
+                          <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+                            <div 
+                              className={`h-2 rounded-full ${suitabilityPercentage >= 70 ? 'bg-green-600' : suitabilityPercentage >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                              style={{ width: `${suitabilityPercentage}%` }}
+                            ></div>
                           </div>
+                          <p className="text-xs">{suitabilityPercentage}% 適合</p>
                           
-                          <h5 className="text-sm font-medium mt-4 mb-2">MBTIタイプ特性</h5>
-                          <div className="text-xs text-gray-600 space-y-1">
-                            <div>
-                              <span className="font-medium">{member.mbtiType[0]}</span>: {member.mbtiType[0] === 'E' ? '外向型' : '内向型'}
-                            </div>
-                            <div>
-                              <span className="font-medium">{member.mbtiType[1]}</span>: {member.mbtiType[1] === 'S' ? '感覚型' : '直感型'}
-                            </div>
-                            <div>
-                              <span className="font-medium">{member.mbtiType[2]}</span>: {member.mbtiType[2] === 'T' ? '思考型' : '感情型'}
-                            </div>
-                            <div>
-                              <span className="font-medium">{member.mbtiType[3]}</span>: {member.mbtiType[3] === 'J' ? '判断型' : '知覚型'}
+                          <div className="mt-3">
+                            <p className="text-xs text-gray-600 mb-1">推奨スキル:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {phase.keySkills.slice(0, 3).map((skill, index) => (
+                                <span key={index} className="text-xs px-2 py-0.5 bg-white/70 rounded-full">
+                                  {skill}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="mt-6">
+                    <h4 className="text-sm font-semibold mb-3">チームの強みフェーズ</h4>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      {selectedMembers.length > 0 ? (
+                        <>
+                          <p className="text-sm mb-2">
+                            現在のチーム構成では
+                            <span className="font-medium"> {getTeamStrengthPhase()} </span>
+                            が最も強みを発揮できるフェーズです。
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            チームメンバーのMBTIタイプ分布とスキルセットから分析しています。特に重要な開発フェーズがある場合は、そのフェーズに適したメンバーを追加することを検討してください。
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          チームメンバーが選択されていないため、分析できません。
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </Card>
               </div>
               
-              {/* チームスキル分析 */}
+              {/* プロジェクト種別に応じた推奨チーム構成 */}
               <div className="mb-8">
                 <Card className="shadow-md rounded-lg p-6">
                   <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-blue-600">
-                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                     </svg>
-                    チームスキル分析
+                    プロジェクト適合性分析
                   </h3>
                   <p className="text-sm text-gray-600 mb-6">
-                    チーム全体のスキル分布と、それに基づく強みを分析しています。左側のグラフはチーム内で共有されているスキルの割合を示し、右側ではその結果判明したチームとしての強みを説明しています。
+                    現在のチーム構成が、異なるタイプのプロジェクトにどれだけ適しているかを評価しています。プロジェクトタイプごとの適合度と、最適なチーム構成のためのギャップを確認できます。
                   </p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* チームスキル分布 */}
-                    <div className="md:col-span-1 bg-blue-50 p-4 rounded-lg">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-3">主要スキル分布</h4>
-                      {prepareTeamSkillsData().length > 0 ? (
-                        <div className="h-60">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                              layout="vertical"
-                              data={prepareTeamSkillsData()}
-                              margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis type="number" domain={[0, 100]} />
-                              <YAxis type="category" dataKey="skill" width={100} tick={{ fontSize: 10 }} />
-                              <Tooltip
-                                formatter={(value: any) => [`${value}%`, 'チーム内シェア']}
-                                labelFormatter={(label) => `スキル: ${label}`}
-                              />
-                              <Bar dataKey="percentage" fill="#6366f1" barSize={14} />
-                            </BarChart>
-                          </ResponsiveContainer>
+                  <div className="space-y-8">
+                    {PROJECT_TYPES.map((projectType) => {
+                      // 現在のMBTI分布と理想的な分布のギャップを計算
+                      const mbtiGap = calculateMbtiGap(mbtiDistribution, projectType.idealMbtiDistribution);
+                      // スキルギャップを計算
+                      const skillGap = calculateSkillGap(selectedMembers, projectType.keySkills);
+                      // 総合適合度を計算 (0-100%)
+                      const overallFitPercentage = Math.max(0, 100 - (mbtiGap * 0.6 + skillGap * 0.4));
+                      
+                      return (
+                        <div key={projectType.id} className="border border-gray-200 rounded-lg p-5">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h4 className="text-md font-medium">{projectType.name}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{projectType.description}</p>
+                            </div>
+                            <div className={`text-xl font-bold ${getProjectFitColorClass(overallFitPercentage)}`}>
+                              {Math.round(overallFitPercentage)}%
+                            </div>
+                          </div>
+                          
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-500 mb-1">総合適合度</p>
+                            <div className="w-full bg-gray-200 rounded-full h-3">
+                              <div 
+                                className={`h-3 rounded-full ${getProjectFitGradient(overallFitPercentage)}`} 
+                                style={{ width: `${overallFitPercentage}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
+                            <div>
+                              <h5 className="text-sm font-medium mb-3">推奨役割とスキル</h5>
+                              <div className="bg-blue-50 p-3 rounded-lg">
+                                <div className="mb-3">
+                                  <p className="text-xs text-blue-800 mb-1">主要役割</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {projectType.recommendedRoles.map((role, idx) => (
+                                      <span key={idx} className={`text-xs px-2 py-1 rounded-full ${
+                                        hasRoleInTeam(role) ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
+                                      }`}>
+                                        {role} {hasRoleInTeam(role) && '✓'}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-blue-800 mb-1">必要スキル</p>
+                                  <div className="flex flex-wrap gap-1">
+                                    {projectType.keySkills.map((skill, idx) => (
+                                      <span key={idx} className={`text-xs px-2 py-1 rounded-full ${
+                                        hasSkillInTeam(skill) ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
+                                      }`}>
+                                        {skill} {hasSkillInTeam(skill) && '✓'}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h5 className="text-sm font-medium mb-3">MBTIタイプ適合性</h5>
+                              <div className="bg-purple-50 p-3 rounded-lg">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <p className="text-xs text-purple-800 mb-1">E vs I</p>
+                                    <div className="flex items-center">
+                                      <div className="w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="bg-purple-500 h-2 rounded-full" 
+                                          style={{ width: `${mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100}%` }}></div>
+                                      </div>
+                                      <div className="ml-2 text-xs">
+                                        {Math.round(mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100 || 0)}%
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between text-xs mt-1">
+                                      <span>E</span>
+                                      <span>I</span>
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="text-xs text-purple-800 mb-1">S vs N</p>
+                                    <div className="flex items-center">
+                                      <div className="w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="bg-purple-500 h-2 rounded-full" 
+                                          style={{ width: `${mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100}%` }}></div>
+                                      </div>
+                                      <div className="ml-2 text-xs">
+                                        {Math.round(mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100 || 0)}%
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between text-xs mt-1">
+                                      <span>S</span>
+                                      <span>N</span>
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="text-xs text-purple-800 mb-1">T vs F</p>
+                                    <div className="flex items-center">
+                                      <div className="w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="bg-purple-500 h-2 rounded-full" 
+                                          style={{ width: `${mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100}%` }}></div>
+                                      </div>
+                                      <div className="ml-2 text-xs">
+                                        {Math.round(mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100 || 0)}%
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between text-xs mt-1">
+                                      <span>T</span>
+                                      <span>F</span>
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="text-xs text-purple-800 mb-1">J vs P</p>
+                                    <div className="flex items-center">
+                                      <div className="w-full h-2 bg-gray-200 rounded-full">
+                                        <div className="bg-purple-500 h-2 rounded-full" 
+                                          style={{ width: `${mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100}%` }}></div>
+                                      </div>
+                                      <div className="ml-2 text-xs">
+                                        {Math.round(mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100 || 0)}%
+                                      </div>
+                                    </div>
+                                    <div className="flex justify-between text-xs mt-1">
+                                      <span>J</span>
+                                      <span>P</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-5">
+                            <h5 className="text-sm font-medium mb-2">ギャップ分析</h5>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              {getBestRecommendation(projectType)}
+                            </div>
+                          </div>
                         </div>
-                      ) : (
-                        <p className="text-sm text-gray-500">スキルデータが不足しています</p>
-                      )}
+                      );
+                    })}
+                  </div>
+                </Card>
+              </div>
+              
+              {/* チーム関係性の視覚化 */}
+              <div className="mb-8">
+                <Card className="shadow-md rounded-lg p-6">
+                  <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-green-600">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                      <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                    チーム構成可視化
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    チームメンバー間の相性と相互関係を視覚的に表現しています。チーム全体の強みと弱みの分布が一目でわかります。
+                  </p>
+                  
+                  <div className="h-80 w-full">
+                    {selectedMembers.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={getTeamRadarData()}>
+                          <PolarGrid />
+                          <PolarAngleAxis dataKey="axis" />
+                          <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                          <Radar
+                            name="チーム平均"
+                            dataKey="value"
+                            stroke="#8884d8"
+                            fill="#8884d8"
+                            fillOpacity={0.6}
+                          />
+                          <Tooltip />
+                          <Legend />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="h-full flex items-center justify-center">
+                        <p className="text-gray-500">チームメンバーが選択されていないため、表示できません</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-semibold mb-3 text-blue-800">チーム統合指数</h4>
+                      <div className="flex items-center mb-3">
+                        <div className="w-full h-3 bg-gray-200 rounded-full mr-4">
+                          <div 
+                            className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600" 
+                            style={{ width: `${getTeamCohesionScore()}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-lg font-bold">{getTeamCohesionScore()}%</span>
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        チームメンバー間のMBTI相性とスキル補完性から算出したチーム統合指数です。
+                        数値が高いほど、チームとしての一体感や協力関係が構築しやすいことを示しています。
+                      </p>
                     </div>
                     
-                    {/* スキルベースの強み */}
-                    <div className="md:col-span-2">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-3">スキルベースの強み</h4>
-                      {skillsBasedStrengths.length > 0 ? (
-                        <ul className="space-y-3">
-                          {skillsBasedStrengths.map((strength) => (
-                            <li key={strength.id} className="bg-blue-50 p-3 rounded-lg">
-                              <div className="flex mb-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mt-0.5 mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                </svg>
-                                <span className="text-gray-700 font-medium">{strength.text}</span>
-                              </div>
-                              <p className="text-sm text-gray-600 ml-7">{strength.detail}</p>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-gray-500 text-sm">チームスキルが不足しているため、分析できません。</p>
-                      )}
+                    <div className="bg-gradient-to-br from-green-50 to-blue-50 p-4 rounded-lg">
+                      <h4 className="text-sm font-semibold mb-3 text-green-800">チーム多様性指数</h4>
+                      <div className="flex items-center mb-3">
+                        <div className="w-full h-3 bg-gray-200 rounded-full mr-4">
+                          <div 
+                            className="h-3 rounded-full bg-gradient-to-r from-green-500 to-blue-500" 
+                            style={{ width: `${getTeamDiversityScore()}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-lg font-bold">{getTeamDiversityScore()}%</span>
+                      </div>
+                      <p className="text-xs text-gray-600">
+                        チーム内のMBTIタイプやスキルの多様性から算出した指数です。
+                        数値が高いほど、多角的な視点や幅広いスキルセットを持つチームであることを示しています。
+                      </p>
                     </div>
                   </div>
                 </Card>
