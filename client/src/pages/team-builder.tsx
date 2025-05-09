@@ -1109,69 +1109,126 @@ export default function TeamBuilder() {
                   </Button>
                 </div>
                 
-                <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 scrollbar-hide">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">MBTIタイプ</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {teamMembers.map((member) => (
-                        <tr key={member.id}>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Avatar className="h-6 w-6 sm:h-10 sm:w-10">
-                                <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
-                                  {getUserInitials(member.username)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="ml-2 sm:ml-4">
-                                <div className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</div>
-                              </div>
+                <div className="space-y-3 sm:space-y-4">
+                  {/* モバイル表示 */}
+                  <div className="block sm:hidden">
+                    {teamMembers.map((member) => (
+                      <div key={member.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
+                                {getUserInitials(member.username)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="ml-2">
+                              <div className="text-sm font-medium text-gray-900">{member.username}</div>
+                              {member.mbtiType ? (
+                                <span className={`px-1 inline-flex text-[10px] leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
+                                  {member.mbtiType}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 text-[10px]">MBTIタイプ未設定</span>
+                              )}
                             </div>
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                            {member.mbtiType ? (
-                              <span className={`px-1 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
-                                {member.mbtiType}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-[10px] sm:text-xs">未設定</span>
-                            )}
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
-                            {member.skills || "未設定"}
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
+                          </div>
+                          <Checkbox 
+                            checked={member.selected}
+                            onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
+                            className="h-4 w-4"
+                          />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-2 text-[10px] text-gray-500">
+                          <div>
+                            <span className="font-medium text-gray-600">役割：</span>
                             {member.role || "未設定"}
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
-                            <Checkbox 
-                              checked={member.selected}
-                              onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
-                              className="h-3 w-3 sm:h-4 sm:w-4"
-                            />
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleDeleteMember(member.id)}
-                              className="text-red-600 hover:text-red-800 h-6 px-2 py-1 sm:h-8 sm:px-3 sm:py-1"
-                            >
-                              削除
-                            </Button>
-                          </td>
+                          </div>
+                          <div>
+                            <span className="font-medium text-gray-600">スキル：</span>
+                            {member.skills || "未設定"}
+                          </div>
+                        </div>
+                        
+                        <div className="flex justify-end">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteMember(member.id)}
+                            className="text-red-600 hover:text-red-800 h-7 px-2 py-0"
+                          >
+                            削除
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* デスクトップ表示 */}
+                  <div className="hidden sm:block overflow-x-auto px-0">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MBTIタイプ</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {teamMembers.map((member) => (
+                          <tr key={member.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <Avatar className="h-10 w-10">
+                                  <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+                                    {getUserInitials(member.username)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="ml-4">
+                                  <div className="text-sm font-medium text-gray-900">{member.username}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {member.mbtiType ? (
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
+                                  {member.mbtiType}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 text-xs">未設定</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {member.skills || "未設定"}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {member.role || "未設定"}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <Checkbox 
+                                checked={member.selected}
+                                onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
+                                className="h-4 w-4"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleDeleteMember(member.id)}
+                                className="text-red-600 hover:text-red-800 h-8 px-3 py-1"
+                              >
+                                削除
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
                 
                 <div className="mt-4 sm:mt-6 flex justify-center">
