@@ -1100,7 +1100,7 @@ export default function TeamBuilder() {
                   </h3>
                   <Button 
                     onClick={() => setShowAddMemberDialog(true)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-3 sm:py-2 px-3 sm:px-4"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-3 sm:py-2 px-3 sm:px-4 w-40 sm:w-48 md:w-56"
                   >
                     <svg width="14" height="14" className="sm:w-4 sm:h-4 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 5v14M5 12h14"></path>
@@ -1272,7 +1272,7 @@ export default function TeamBuilder() {
                 <div className="mt-4 sm:mt-6 flex justify-center">
                   <Button 
                     onClick={handleAnalyzeTeam} 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-3 sm:py-6 px-3 sm:px-8 text-xs sm:text-base font-medium"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-3 sm:py-6 px-4 sm:px-8 text-xs sm:text-base font-medium w-40 sm:w-48 md:w-56"
                   >
                     <svg width="14" height="14" className="sm:w-5 sm:h-5 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M3 3v18h18"></path>
