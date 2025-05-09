@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -646,7 +646,7 @@ export default function TeamBuilder() {
   const selectedMembers = teamMembers.filter(member => member.selected);
   
   // チームの強みと課題を取得
-  const teamStrengths = React.useMemo(() => {
+  const teamStrengths = useMemo(() => {
     if (selectedMembers.length === 0) return [];
     
     // MBTIタイプの集計
@@ -763,7 +763,7 @@ export default function TeamBuilder() {
   }, [selectedMembers]);
   
   // チームの課題を取得
-  const teamChallenges = React.useMemo(() => {
+  const teamChallenges = useMemo(() => {
     if (selectedMembers.length === 0) return [];
     
     // MBTIタイプの集計
@@ -954,13 +954,13 @@ export default function TeamBuilder() {
   const mbtiDistribution = calculateMbtiDistribution();
   
   // チーム能力のレーダーチャートデータ
-  const teamRadarData = React.useMemo(() => {
+  const teamRadarData = useMemo(() => {
     return getTeamRadarData();
   }, [selectedMembers]);
   
   // チーム統合指数と多様性指数
-  const cohesionScore = React.useMemo(() => getTeamCohesionScore(), [selectedMembers]);
-  const diversityScore = React.useMemo(() => getTeamDiversityScore(), [selectedMembers]);
+  const cohesionScore = useMemo(() => getTeamCohesionScore(), [selectedMembers]);
+  const diversityScore = useMemo(() => getTeamDiversityScore(), [selectedMembers]);
   
   return (
     <div className="container mx-auto px-4 py-8">
