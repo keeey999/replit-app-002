@@ -570,1297 +570,1240 @@ export default function TeamBuilder() {
   };
   
   const handleAnalyzeTeam = () => {
-    if (teamMembers.filter(m => m.selected).length < 2) {
-      toast({
-        title: "メンバーを選択してください",
-        description: "分析には少なくとも2人のメンバーを選択する必要があります。",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     setActiveTab("analysis");
-    
-    toast({
-      title: "チーム分析が完了しました",
-      description: "選択されたメンバーの相性分析が表示されます。",
-    });
   };
   
-  // ユーザーのイニシャルを取得
-  const getUserInitials = (username: string) => {
-    if (!username) return "??";
-    return username
-      .split(/\s+/)
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-  
-  const getMbtiTypeColorClass = (mbtiType?: string) => {
-    if (!mbtiType) return "bg-gray-100 text-gray-800";
-    
-    const firstLetter = mbtiType[0];
-    switch (firstLetter) {
-      case "I":
-        return "bg-blue-100 text-blue-800";
-      case "E":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-purple-100 text-purple-800";
-    }
-  };
-  
-  // MBTIタイプに基づいた役割を自動割り当て
+  // MBTIタイプに基づいて役割を提案する関数
   const assignRoleByMbtiType = (mbtiType: string): string => {
+    // MBTIタイプに基づいて推奨役割を返す
     if (!mbtiType) return "メンバー";
     
-    const firstLetter = mbtiType[0];
-    const lastLetter = mbtiType[3];
-    
-    if (firstLetter === "E" && lastLetter === "J") return "リーダー";
-    if (firstLetter === "I" && mbtiType[1] === "N" && mbtiType[2] === "T") return "アナリスト";
-    if (firstLetter === "E" && mbtiType[2] === "F") return "コミュニケーター";
-    if (mbtiType[1] === "S" && lastLetter === "J") return "オーガナイザー";
-    if (mbtiType[1] === "N" && lastLetter === "P") return "イノベーター";
+    if (mbtiType.includes("ENT")) return "リーダー";
+    if (mbtiType.includes("EST")) return "マネージャー";
+    if (mbtiType.includes("INJ")) return "アナリスト";
+    if (mbtiType.includes("ENF")) return "コミュニケーター";
+    if (mbtiType.includes("IST")) return "テスター";
+    if (mbtiType.includes("INT")) return "アーキテクト";
+    if (mbtiType.includes("ISF")) return "サポート";
+    if (mbtiType.includes("ESP")) return "イノベーター";
+    if (mbtiType.includes("NFP")) return "デザイナー";
+    if (mbtiType.includes("STP")) return "エンジニア";
     
     return "メンバー";
   };
   
-  // ロールに合わせたバッジカラーを取得
+  // 役割に応じたバッジのクラスを取得
   const getRoleBadgeClass = (role: string): string => {
-    switch (role) {
-      case "リーダー":
-      case "プロジェクトマネージャー":
-        return "bg-blue-100 text-blue-800";
-      case "アナリスト":
-      case "システムアナリスト":
-        return "bg-green-100 text-green-800";
-      case "コミュニケーター":
-      case "マーケティングディレクター":
-        return "bg-purple-100 text-purple-800";
-      case "オーガナイザー":
-        return "bg-orange-100 text-orange-800";
-      case "イノベーター":
-      case "デザイナー":
-        return "bg-pink-100 text-pink-800";
-      case "エンジニア":
-      case "開発者":
-      case "テスター":
-        return "bg-indigo-100 text-indigo-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-  
-  // MBTIタイプの分布を計算
-  const calculateMbtiDistribution = () => {
-    const selectedMembers = teamMembers.filter(member => member.selected);
-    
-    // Eか I かの数
-    const eCount = selectedMembers.filter(member => member.mbtiType.startsWith("E")).length;
-    const iCount = selectedMembers.filter(member => member.mbtiType.startsWith("I")).length;
-    
-    // Sか N かの数
-    const sCount = selectedMembers.filter(member => member.mbtiType[1] === "S").length;
-    const nCount = selectedMembers.filter(member => member.mbtiType[1] === "N").length;
-    
-    // Tか F かの数
-    const tCount = selectedMembers.filter(member => member.mbtiType[2] === "T").length;
-    const fCount = selectedMembers.filter(member => member.mbtiType[2] === "F").length;
-    
-    // Jか P かの数
-    const jCount = selectedMembers.filter(member => member.mbtiType[3] === "J").length;
-    const pCount = selectedMembers.filter(member => member.mbtiType[3] === "P").length;
-    
-    return {
-      eVsI: { E: eCount, I: iCount },
-      sVsN: { S: sCount, N: nCount },
-      tVsF: { T: tCount, F: fCount },
-      jVsP: { J: jCount, P: pCount }
+    const roleToClassMap: Record<string, string> = {
+      "リーダー": "bg-indigo-100 text-indigo-800",
+      "プロジェクトマネージャー": "bg-blue-100 text-blue-800",
+      "マネージャー": "bg-blue-100 text-blue-800",
+      "アナリスト": "bg-purple-100 text-purple-800",
+      "アーキテクト": "bg-purple-100 text-purple-800",
+      "コミュニケーター": "bg-green-100 text-green-800",
+      "デザイナー": "bg-pink-100 text-pink-800",
+      "サポート": "bg-teal-100 text-teal-800",
+      "テスター": "bg-orange-100 text-orange-800",
+      "エンジニア": "bg-cyan-100 text-cyan-800",
+      "開発者": "bg-cyan-100 text-cyan-800",
+      "イノベーター": "bg-red-100 text-red-800"
     };
+    
+    return roleToClassMap[role] || "bg-gray-100 text-gray-800";
   };
   
-  const selectedMembers = teamMembers.filter(member => member.selected);
-  const mbtiDistribution = calculateMbtiDistribution();
+  // MBTIタイプに応じた色クラスを取得
+  const getMbtiTypeColorClass = (mbtiType: string): string => {
+    if (mbtiType.startsWith("ENT")) return "bg-indigo-100 text-indigo-800";
+    if (mbtiType.startsWith("INT")) return "bg-purple-100 text-purple-800";
+    if (mbtiType.startsWith("EST")) return "bg-blue-100 text-blue-800";
+    if (mbtiType.startsWith("IST")) return "bg-teal-100 text-teal-800";
+    if (mbtiType.startsWith("ENF")) return "bg-green-100 text-green-800";
+    if (mbtiType.startsWith("INF")) return "bg-emerald-100 text-emerald-800";
+    if (mbtiType.startsWith("ESF")) return "bg-cyan-100 text-cyan-800";
+    if (mbtiType.startsWith("ISF")) return "bg-sky-100 text-sky-800";
+    if (mbtiType.startsWith("ENT")) return "bg-amber-100 text-amber-800";
+    if (mbtiType.startsWith("INT")) return "bg-violet-100 text-violet-800";
+    if (mbtiType.startsWith("EST")) return "bg-orange-100 text-orange-800";
+    if (mbtiType.startsWith("IST")) return "bg-rose-100 text-rose-800";
+    
+    return "bg-gray-100 text-gray-800";
+  };
   
-  // チームの強みを判断
-  const getTeamStrengths = () => {
+  // ユーザーのイニシャルを取得
+  const getUserInitials = (name: string): string => {
+    if (!name) return "??";
+    
+    const parts = name.split(" ");
+    if (parts.length > 1) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    
+    return name.substring(0, 2).toUpperCase();
+  };
+  
+  // 選択されたメンバーのみを取得
+  const selectedMembers = teamMembers.filter(member => member.selected);
+  
+  // チームの強みと課題を取得
+  const teamStrengths = React.useMemo(() => {
+    if (selectedMembers.length === 0) return [];
+    
+    // MBTIタイプの集計
+    const mbtiCounts = selectedMembers.reduce((acc, member) => {
+      const type = member.mbtiType;
+      if (type) {
+        // E vs I
+        if (type.startsWith("E")) acc.E++;
+        else if (type.startsWith("I")) acc.I++;
+        
+        // S vs N
+        if (type.includes("S")) acc.S++;
+        else if (type.includes("N")) acc.N++;
+        
+        // T vs F
+        if (type.includes("T")) acc.T++;
+        else if (type.includes("F")) acc.F++;
+        
+        // J vs P
+        if (type.includes("J")) acc.J++;
+        else if (type.includes("P")) acc.P++;
+      }
+      return acc;
+    }, { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 });
+    
+    // チームの強みを分析
     const strengths = [];
     
-    if (selectedMembers.some(m => m.mbtiType.includes('ENT'))) {
-      strengths.push({ 
-        id: 'leadership', 
-        text: 'リーダーシップとビジョン設定の能力（ENTJ/ENTP）',
-        detail: 'チームを率いて大局的な方向性を示し、戦略的な目標設定ができます。意思決定が早く、プロジェクト推進力が高いです。'
+    // Eが多い場合
+    if (mbtiCounts.E > mbtiCounts.I && mbtiCounts.E > 1) {
+      strengths.push({
+        id: 1,
+        text: "優れた外部コミュニケーション能力",
+        detail: "外向型(E)メンバーが多く、外部との連携やコミュニケーションが得意なチームです。顧客対応や他チームとの協業がスムーズに進むでしょう。"
       });
     }
     
-    if (selectedMembers.some(m => m.mbtiType.includes('INT'))) {
-      strengths.push({ 
-        id: 'analysis', 
-        text: '論理的分析と問題解決能力（INTJ/INTP）',
-        detail: '複雑な問題を論理的に分析し、独創的な解決策を見出すことができます。長期的な視点を持ち、効率的なシステム構築に優れています。'
+    // Iが多い場合
+    if (mbtiCounts.I > mbtiCounts.E && mbtiCounts.I > 1) {
+      strengths.push({
+        id: 2,
+        text: "深い思考と内省的アプローチ",
+        detail: "内向型(I)メンバーが多く、じっくりと考え抜いた質の高い成果物を生み出せるチームです。複雑な問題の根本的な解決に強みがあります。"
       });
     }
     
-    if (selectedMembers.some(m => m.mbtiType.includes('NFJ'))) {
-      strengths.push({ 
-        id: 'harmony', 
-        text: 'チームの調和を保つ能力（ENFJ/INFJ）',
-        detail: 'メンバー間の関係性を重視し、調和のとれたコミュニケーションを促進します。チームの意欲を高め、個々の強みを引き出すことに長けています。'
+    // Nが多い場合
+    if (mbtiCounts.N > mbtiCounts.S && mbtiCounts.N > 1) {
+      strengths.push({
+        id: 3,
+        text: "優れた創造性と革新性",
+        detail: "直感型(N)メンバーが多く、新しいアイデアや未来の可能性を探るのが得意なチームです。イノベーションや長期的なビジョンの構築に強みがあります。"
       });
     }
     
-    if (selectedMembers.some(m => m.mbtiType.includes('STJ'))) {
-      strengths.push({ 
-        id: 'execution', 
-        text: '実務的で組織的な実行力（ESTJ/ISTJ）',
-        detail: '綿密な計画立案と正確な実行を得意とします。責任感が強く、期限や品質基準を厳守することでプロジェクトの安定性を確保します。'
+    // Sが多い場合
+    if (mbtiCounts.S > mbtiCounts.N && mbtiCounts.S > 1) {
+      strengths.push({
+        id: 4,
+        text: "実用的で確実な実行力",
+        detail: "感覚型(S)メンバーが多く、現実的かつ実用的なアプローチが得意なチームです。着実なプロジェクト進行と堅実な品質管理に強みがあります。"
       });
     }
     
-    if (selectedMembers.some(m => m.mbtiType.includes('NFP'))) {
-      strengths.push({ 
-        id: 'creativity', 
-        text: '創造性と柔軟な発想（ENFP/INFP）',
-        detail: '独創的な発想と可能性を追求する姿勢があります。人間中心の視点で問題に取り組み、革新的なアイデアを生み出す力があります。'
+    // Tが多い場合
+    if (mbtiCounts.T > mbtiCounts.F && mbtiCounts.T > 1) {
+      strengths.push({
+        id: 5,
+        text: "論理的で客観的な意思決定",
+        detail: "思考型(T)メンバーが多く、論理的・客観的な分析と意思決定が得意なチームです。効率性や一貫性のある技術的判断に強みがあります。"
       });
     }
     
-    if (selectedMembers.some(m => m.mbtiType.includes('SFJ'))) {
-      strengths.push({ 
-        id: 'support', 
-        text: '細やかなサポートとチームケア（ESFJ/ISFJ）',
-        detail: 'メンバーのニーズに敏感に反応し、協力的な環境づくりに貢献します。詳細に気を配り、チーム内の人間関係や実務面での支援が得意です。'
+    // Fが多い場合
+    if (mbtiCounts.F > mbtiCounts.T && mbtiCounts.F > 1) {
+      strengths.push({
+        id: 6,
+        text: "人間中心の価値観と調和",
+        detail: "感情型(F)メンバーが多く、チーム内の調和とユーザー視点を大切にできるチームです。人間関係の構築とユーザー体験の向上に強みがあります。"
+      });
+    }
+    
+    // Jが多い場合
+    if (mbtiCounts.J > mbtiCounts.P && mbtiCounts.J > 1) {
+      strengths.push({
+        id: 7,
+        text: "計画的で体系的な進行管理",
+        detail: "判断型(J)メンバーが多く、計画に沿った体系的なプロジェクト管理が得意なチームです。納期厳守と着実な進捗に強みがあります。"
+      });
+    }
+    
+    // Pが多い場合
+    if (mbtiCounts.P > mbtiCounts.J && mbtiCounts.P > 1) {
+      strengths.push({
+        id: 8,
+        text: "柔軟性と適応力の高さ",
+        detail: "知覚型(P)メンバーが多く、変化に柔軟に対応できるチームです。予期せぬ状況での臨機応変な対応や新しい情報の取り込みに強みがあります。"
+      });
+    }
+    
+    // 全体のバランスが良い場合
+    if (Math.abs(mbtiCounts.E - mbtiCounts.I) <= 1 && 
+        Math.abs(mbtiCounts.S - mbtiCounts.N) <= 1 && 
+        Math.abs(mbtiCounts.T - mbtiCounts.F) <= 1 && 
+        Math.abs(mbtiCounts.J - mbtiCounts.P) <= 1) {
+      strengths.push({
+        id: 9,
+        text: "多様な視点とバランスの取れたアプローチ",
+        detail: "MBTIタイプのバランスが取れており、多角的な視点からプロジェクトを進められるチームです。様々な側面をカバーできる総合力に強みがあります。"
       });
     }
     
     return strengths;
-  };
+  }, [selectedMembers]);
   
-  // チームの課題を判断
-  const getTeamChallenges = () => {
+  // チームの課題を取得
+  const teamChallenges = React.useMemo(() => {
+    if (selectedMembers.length === 0) return [];
+    
+    // MBTIタイプの集計
+    const mbtiCounts = selectedMembers.reduce((acc, member) => {
+      const type = member.mbtiType;
+      if (type) {
+        // E vs I
+        if (type.startsWith("E")) acc.E++;
+        else if (type.startsWith("I")) acc.I++;
+        
+        // S vs N
+        if (type.includes("S")) acc.S++;
+        else if (type.includes("N")) acc.N++;
+        
+        // T vs F
+        if (type.includes("T")) acc.T++;
+        else if (type.includes("F")) acc.F++;
+        
+        // J vs P
+        if (type.includes("J")) acc.J++;
+        else if (type.includes("P")) acc.P++;
+      }
+      return acc;
+    }, { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 });
+    
+    // チームの課題を分析
     const challenges = [];
     
-    if (mbtiDistribution.tVsF.T > mbtiDistribution.tVsF.F * 2 && mbtiDistribution.tVsF.T >= 2) {
-      challenges.push({ 
-        id: 'emotional_intelligence', 
-        text: '感情面への配慮が不足する可能性（T型が多い）',
-        detail: '論理や効率を重視するあまり、チーム内の感情的な側面や人間関係の重要性を見落とす可能性があります。決断が冷淡に映ることもあるでしょう。',
-        solution: '意識的に感情面への配慮を行い、重要な決定の際には全員の意見や感情を考慮するプロセスを設けましょう。'
+    // Eがほとんどいない場合
+    if (mbtiCounts.E === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 1,
+        text: "外部コミュニケーションの不足",
+        detail: "チーム内に外向型(E)のメンバーがおらず、外部との活発なコミュニケーションが難しい可能性があります。",
+        solution: "ミーティングや報告書のフォーマットを標準化し、コミュニケーションの負担を減らしましょう。または一部のメンバーが意識的に外部連携役を担当することも有効です。"
       });
     }
     
-    if (mbtiDistribution.tVsF.F > mbtiDistribution.tVsF.T * 2 && mbtiDistribution.tVsF.F >= 2) {
-      challenges.push({ 
-        id: 'objective_decision', 
-        text: '客観的な判断が難しい場合がある（F型が多い）',
-        detail: '人間関係や調和を重視するあまり、困難な決断や客観的評価が必要な場面で躊躇することがあります。批判的なフィードバックがチーム内で不足する可能性があります。',
-        solution: '客観的な評価基準を事前に設定し、データに基づいた意思決定の仕組みを取り入れましょう。'
+    // Iがほとんどいない場合
+    if (mbtiCounts.I === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 2,
+        text: "深い考察と内省の不足",
+        detail: "チーム内に内向型(I)のメンバーがおらず、深い思考や内省的な分析が不足する可能性があります。",
+        solution: "重要な決定を下す前に「検討時間」を設け、各自が熟考できる時間を確保しましょう。オンラインでの非同期的なフィードバックの仕組みも効果的です。"
       });
     }
     
-    if (mbtiDistribution.jVsP.J > mbtiDistribution.jVsP.P * 2 && mbtiDistribution.jVsP.J >= 2) {
-      challenges.push({ 
-        id: 'flexibility', 
-        text: '柔軟性に欠ける可能性がある（J型が多い）',
-        detail: '計画通りに物事を進めることを好むため、状況変化への対応が遅れることがあります。新しいアイデアや方法に対して抵抗を示すことがあります。',
-        solution: '定期的に計画や方法を見直す時間を設け、変化に対応するための余裕を計画に組み込みましょう。'
+    // Nがほとんどいない場合
+    if (mbtiCounts.N === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 3,
+        text: "長期的視点と創造性の不足",
+        detail: "チーム内に直感型(N)のメンバーがおらず、長期的な可能性や創造的なアイデアが不足する可能性があります。",
+        solution: "定期的なブレインストーミングセッションを設け、自由な発想を促進しましょう。外部からの新しい視点や技術トレンドを定期的にインプットすることも大切です。"
       });
     }
     
-    if (mbtiDistribution.jVsP.P > mbtiDistribution.jVsP.J * 2 && mbtiDistribution.jVsP.P >= 2) {
-      challenges.push({ 
-        id: 'deadline', 
-        text: '締め切りや計画の遵守が難しい場合がある（P型が多い）',
-        detail: '柔軟性を重視するあまり、締め切りの厳守や計画的な進行が難しくなることがあります。最終決定を先延ばしにする傾向があります。',
-        solution: '明確なマイルストーンと中間チェックポイントを設定し、進捗を可視化する仕組みを導入しましょう。'
+    // Sがほとんどいない場合
+    if (mbtiCounts.S === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 4,
+        text: "現実的な実行力の不足",
+        detail: "チーム内に感覚型(S)のメンバーがおらず、現実的な実装や細部への注意が不足する可能性があります。",
+        solution: "詳細な実装計画とチェックリストを作成し、具体的なステップを明確にしましょう。定期的な進捗確認と実用性の検証プロセスを確立することが重要です。"
       });
     }
     
-    if (mbtiDistribution.eVsI.I > mbtiDistribution.eVsI.E * 2 && mbtiDistribution.eVsI.I >= 2) {
-      challenges.push({ 
-        id: 'communication', 
-        text: '活発なコミュニケーションが不足する可能性（I型が多い）',
-        detail: '内省的なメンバーが多いため、自発的な情報共有やディスカッションが不足しがちです。意見や懸念が表明されないまま進行することがあります。',
-        solution: '定期的な1対1のミーティングやオンラインでの非同期コミュニケーションの仕組みを取り入れましょう。'
+    // Fがほとんどいない場合
+    if (mbtiCounts.F === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 5,
+        text: "人間中心の視点の不足",
+        detail: "チーム内に感情型(F)のメンバーがおらず、人間関係やユーザー感情への配慮が不足する可能性があります。",
+        solution: "ユーザーペルソナを作成し、常に参照できるようにしましょう。定期的なユーザビリティテストやフィードバックセッションを実施し、ユーザー視点を取り入れることが大切です。"
       });
     }
     
-    if (mbtiDistribution.eVsI.E > mbtiDistribution.eVsI.I * 2 && mbtiDistribution.eVsI.E >= 2) {
-      challenges.push({ 
-        id: 'depth', 
-        text: '深い思考や集中作業の時間が確保しにくい（E型が多い）',
-        detail: '対話や議論が活発な一方で、個人の集中作業や内省の時間が十分に確保されないことがあります。また、意思決定が性急になる可能性があります。',
-        solution: '「ディープワーク」の時間を明示的にスケジュールに組み込み、集中作業の環境を整えましょう。'
+    // Jがほとんどいない場合
+    if (mbtiCounts.J === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 6,
+        text: "構造化された計画性の不足",
+        detail: "チーム内に判断型(J)のメンバーがおらず、計画的で体系的なプロジェクト管理が難しい可能性があります。",
+        solution: "プロジェクト管理ツールを積極的に活用し、明確なマイルストーンと期限を設定しましょう。週次のスプリント計画と振り返りを習慣化することで計画性を高められます。"
       });
     }
     
-    if (mbtiDistribution.sVsN.S > mbtiDistribution.sVsN.N * 2 && mbtiDistribution.sVsN.S >= 2) {
-      challenges.push({ 
-        id: 'innovation', 
-        text: '革新的なアイデアや長期的なビジョンが不足する可能性（S型が多い）',
-        detail: '現実的で実践的なアプローチを好むあまり、革新的な発想や将来を見据えた計画が不足する可能性があります。',
-        solution: 'ブレインストーミングやアイデア創出のセッションを定期的に設け、「もし〜だったら」という仮説思考を促しましょう。'
+    // Pがほとんどいない場合
+    if (mbtiCounts.P === 0 && selectedMembers.length > 1) {
+      challenges.push({
+        id: 7,
+        text: "柔軟性と適応力の不足",
+        detail: "チーム内に知覚型(P)のメンバーがおらず、変化への柔軟な対応や新しい情報の取り込みが難しい可能性があります。",
+        solution: "定期的に計画を見直し、変更に対応する時間を確保しましょう。アジャイル開発手法を取り入れ、小さな単位での反復と調整を繰り返すアプローチが効果的です。"
       });
     }
     
-    if (mbtiDistribution.sVsN.N > mbtiDistribution.sVsN.S * 2 && mbtiDistribution.sVsN.N >= 2) {
-      challenges.push({ 
-        id: 'practicality', 
-        text: '実務的な詳細への注意が不足する可能性（N型が多い）',
-        detail: '大局的なビジョンや可能性を追求するあまり、実装の詳細や現実的な制約への配慮が不足しがちです。',
-        solution: '実行計画に具体的なチェックリストを含め、詳細な品質基準や要件を明文化しましょう。'
+    // 極端な偏りがある場合
+    if (mbtiCounts.T > 0 && mbtiCounts.F === 0 && mbtiCounts.T >= 3) {
+      challenges.push({
+        id: 8,
+        text: "感情面への配慮不足",
+        detail: "思考型(T)メンバーが多く、チーム内のコミュニケーションや意思決定において感情面への配慮が不足する可能性があります。",
+        solution: "定期的なチームビルディング活動を実施し、メンバー間の信頼関係を構築しましょう。技術的な議論だけでなく、各自の意見や懸念を共有する時間を設けることも重要です。"
+      });
+    }
+    
+    if (mbtiCounts.F > 0 && mbtiCounts.T === 0 && mbtiCounts.F >= 3) {
+      challenges.push({
+        id: 9,
+        text: "客観的な判断の不足",
+        detail: "感情型(F)メンバーが多く、感情に配慮するあまり客観的な判断や効率性の追求が難しくなる可能性があります。",
+        solution: "意思決定の際には、明確な評価基準と定量的なデータを用意しましょう。感情的な要素と論理的な要素の両方を考慮した構造化された意思決定プロセスを確立することが大切です。"
       });
     }
     
     return challenges;
-  };
+  }, [selectedMembers]);
   
-  // メンバースキルの分布を計算
-  const calculateSkillDistribution = () => {
-    const selectedMembers = teamMembers.filter(member => member.selected);
-    const skillsCount: Record<string, number> = {};
+  // MBTI分布を計算する関数
+  const calculateMbtiDistribution = () => {
+    const distribution = {
+      eVsI: { E: 0, I: 0 },
+      sVsN: { S: 0, N: 0 },
+      tVsF: { T: 0, F: 0 },
+      jVsP: { J: 0, P: 0 }
+    };
     
-    // 各スキルの出現回数をカウント
     selectedMembers.forEach(member => {
-      if (member.skills && Array.isArray(member.skills)) {
-        member.skills.forEach(skill => {
-          if (skillsCount[skill]) {
-            skillsCount[skill]++;
-          } else {
-            skillsCount[skill] = 1;
-          }
-        });
-      }
+      const mbti = member.mbtiType;
+      if (!mbti) return;
+      
+      // E vs I
+      if (mbti.startsWith('E')) distribution.eVsI.E += 1;
+      else if (mbti.startsWith('I')) distribution.eVsI.I += 1;
+      
+      // S vs N
+      if (mbti[1] === 'S') distribution.sVsN.S += 1;
+      else if (mbti[1] === 'N') distribution.sVsN.N += 1;
+      
+      // T vs F
+      if (mbti[2] === 'T') distribution.tVsF.T += 1;
+      else if (mbti[2] === 'F') distribution.tVsF.F += 1;
+      
+      // J vs P
+      if (mbti[3] === 'J') distribution.jVsP.J += 1;
+      else if (mbti[3] === 'P') distribution.jVsP.P += 1;
     });
     
-    // チャート用にデータを整形
-    const data = Object.entries(skillsCount)
-      .map(([skill, count]) => ({
-        skill,
-        count,
-        percentage: Math.round((count / selectedMembers.length) * 100)
-      }))
-      .sort((a, b) => b.count - a.count);
-    
-    return data;
+    return distribution;
   };
   
-  // メンバーのスキルに基づいた強みを分析
-  const getSkillsBasedStrengths = () => {
-    const skillDistribution = calculateSkillDistribution();
-    const strengths = [];
-    
-    // 技術的なスキルが多いか確認
-    const technicalSkills = ['プログラミング', '技術開発', '分析', '問題解決'];
-    const hasTechnicalFocus = technicalSkills.some(skill => 
-      skillDistribution.some(item => item.skill === skill && item.percentage >= 50)
-    );
-    
-    if (hasTechnicalFocus) {
-      strengths.push({
-        id: 'technical',
-        text: '技術力と問題解決能力',
-        detail: 'チームは複雑な技術的課題に取り組む能力があります。問題解決能力と分析力を活かした難題への対応が期待できます。'
-      });
-    }
-    
-    // コミュニケーション系スキルが多いか確認
-    const communicationSkills = ['コミュニケーション', 'チームビルディング', '交渉', '調査'];
-    const hasCommunicationFocus = communicationSkills.some(skill => 
-      skillDistribution.some(item => item.skill === skill && item.percentage >= 50)
-    );
-    
-    if (hasCommunicationFocus) {
-      strengths.push({
-        id: 'communication',
-        text: 'コミュニケーションとチーム構築能力',
-        detail: 'チームは優れたコミュニケーション能力を持ち、メンバー間の連携やステークホルダーとの関係構築に長けています。'
-      });
-    }
-    
-    // 創造性や革新性のスキルが多いか確認
-    const creativeSkills = ['創造性', 'デザイン', 'イノベーション'];
-    const hasCreativeFocus = creativeSkills.some(skill => 
-      skillDistribution.some(item => item.skill === skill && item.percentage >= 30)
-    );
-    
-    if (hasCreativeFocus) {
-      strengths.push({
-        id: 'creativity',
-        text: '創造性と革新的思考',
-        detail: 'チームは新しいアイデアを生み出し、従来の枠にとらわれない革新的なアプローチを取ることができます。'
-      });
-    }
-    
-    // マネジメント系スキルが多いか確認
-    const managementSkills = ['プロジェクト管理', 'リーダーシップ', '計画立案', '組織化'];
-    const hasManagementFocus = managementSkills.some(skill => 
-      skillDistribution.some(item => item.skill === skill && item.percentage >= 40)
-    );
-    
-    if (hasManagementFocus) {
-      strengths.push({
-        id: 'management',
-        text: 'プロジェクト管理と組織力',
-        detail: 'チームはプロジェクトを効率的に進める能力と、組織的に物事を遂行する力があります。計画性と実行力を併せ持っています。'
-      });
-    }
-    
-    return strengths;
-  };
-  
-  // レーダーチャート用データの準備
+  // 個人のレーダーチャートデータを作成
   const prepareRadarData = (member: TeamMember) => {
-    // スキルカテゴリーとレーティング
-    const categories = {
-      'プログラミング': 0,
-      'プロジェクト管理': 0,
-      'コミュニケーション': 0,
-      '分析': 0,
-      '創造性': 0,
-      'リーダーシップ': 0,
-    };
+    const mbti = member.mbtiType;
     
-    // スキルとカテゴリーのマッピング
-    const skillCategoryMap: Record<string, keyof typeof categories> = {
-      'プログラミング': 'プログラミング',
-      '技術開発': 'プログラミング',
-      'プロジェクト管理': 'プロジェクト管理',
-      '計画立案': 'プロジェクト管理',
-      '組織化': 'プロジェクト管理',
-      'コミュニケーション': 'コミュニケーション',
-      'チームビルディング': 'コミュニケーション',
-      '交渉': 'コミュニケーション',
-      '分析': '分析',
-      '問題解決': '分析',
-      '調査': '分析',
-      '構造化思考': '分析',
-      '創造性': '創造性',
-      'デザイン': '創造性',
-      'イノベーション': '創造性',
-      'リーダーシップ': 'リーダーシップ',
-    };
-    
-    // MBTIタイプに基づいた基本値の設定
-    if (member.mbtiType) {
-      const firstLetter = member.mbtiType[0];
-      const secondLetter = member.mbtiType[1];
-      const thirdLetter = member.mbtiType[2];
-      const fourthLetter = member.mbtiType[3];
-      
-      // E/Iの特性
-      if (firstLetter === 'E') {
-        categories['コミュニケーション'] += 3;
-        categories['リーダーシップ'] += 2;
-      } else {
-        categories['分析'] += 2;
-        categories['プログラミング'] += 1;
+    // 各MBTIタイプに基づいた特性評価（1-10のスケール）
+    return [
+      {
+        subject: "分析力",
+        A: mbti.includes("NT") ? 8 : mbti.includes("ST") ? 7 : mbti.includes("NF") ? 5 : 4
+      },
+      {
+        subject: "創造性",
+        A: mbti.includes("NP") ? 9 : mbti.includes("NF") ? 8 : mbti.includes("NT") ? 7 : 4
+      },
+      {
+        subject: "リーダーシップ",
+        A: mbti.includes("ETJ") ? 9 : mbti.includes("ENJ") ? 8 : mbti.includes("EST") ? 7 : 4
+      },
+      {
+        subject: "実行力",
+        A: mbti.includes("STJ") ? 10 : mbti.includes("NTJ") ? 8 : mbti.includes("STP") ? 7 : 5
+      },
+      {
+        subject: "協調性",
+        A: mbti.includes("FJ") ? 9 : mbti.includes("SF") ? 8 : mbti.includes("NF") ? 7 : 4
+      },
+      {
+        subject: "細部への配慮",
+        A: mbti.includes("IS") ? 9 : mbti.includes("ES") ? 7 : mbti.includes("IN") ? 5 : 4
       }
-      
-      // S/Nの特性
-      if (secondLetter === 'S') {
-        categories['プロジェクト管理'] += 3;
-        categories['プログラミング'] += 1;
-      } else {
-        categories['創造性'] += 3;
-        categories['分析'] += 1;
-      }
-      
-      // T/Fの特性
-      if (thirdLetter === 'T') {
-        categories['分析'] += 3;
-        categories['プログラミング'] += 2;
-      } else {
-        categories['コミュニケーション'] += 3;
-        categories['創造性'] += 1;
-      }
-      
-      // J/Pの特性
-      if (fourthLetter === 'J') {
-        categories['プロジェクト管理'] += 3;
-        categories['リーダーシップ'] += 1;
-      } else {
-        categories['創造性'] += 2;
-        categories['コミュニケーション'] += 1;
-      }
-    }
-    
-    // 役割に基づいた追加ポイント
-    if (member.role) {
-      switch (member.role) {
-        case 'リーダー':
-        case 'プロジェクトマネージャー':
-          categories['リーダーシップ'] += 3;
-          categories['プロジェクト管理'] += 2;
-          break;
-        case 'エンジニア':
-        case '開発者':
-        case 'テスター':
-          categories['プログラミング'] += 3;
-          categories['分析'] += 2;
-          break;
-        case 'アナリスト':
-        case 'システムアナリスト':
-          categories['分析'] += 3;
-          categories['プログラミング'] += 1;
-          break;
-        case 'デザイナー':
-          categories['創造性'] += 3;
-          break;
-        case 'コミュニケーター':
-        case 'マーケティングディレクター':
-          categories['コミュニケーション'] += 3;
-          categories['創造性'] += 1;
-          break;
-      }
-    }
-    
-    // メンバーのスキルに基づいたポイントを追加
-    if (member.skills && Array.isArray(member.skills)) {
-      member.skills.forEach(skill => {
-        const category = skillCategoryMap[skill];
-        if (category && categories[category] !== undefined) {
-          categories[category] += 2;
-        }
-      });
-    }
-    
-    // 最大値を10に制限
-    Object.keys(categories).forEach(key => {
-      const typedKey = key as keyof typeof categories;
-      if (categories[typedKey] > 10) {
-        categories[typedKey] = 10;
-      }
-    });
-    
-    // レーダーチャート用にデータを整形
-    return Object.entries(categories).map(([category, value]) => ({
-      category,
-      value,
-      fullMark: 10
-    }));
+    ];
   };
   
-  // チームスキル分布データの準備
-  const prepareTeamSkillsData = () => {
-    const skillDistribution = calculateSkillDistribution();
-    return skillDistribution.slice(0, 8); // 上位8つのスキルを表示
-  };
+  // MBTI分布の計算を実行
+  const mbtiDistribution = calculateMbtiDistribution();
   
-  const teamStrengths = getTeamStrengths();
-  const teamChallenges = getTeamChallenges();
-  const skillsBasedStrengths = getSkillsBasedStrengths();
+  // チーム能力のレーダーチャートデータ
+  const teamRadarData = React.useMemo(() => {
+    return getTeamRadarData();
+  }, [selectedMembers]);
+  
+  // チーム統合指数と多様性指数
+  const cohesionScore = React.useMemo(() => getTeamCohesionScore(), [selectedMembers]);
+  const diversityScore = React.useMemo(() => getTeamDiversityScore(), [selectedMembers]);
   
   return (
-    <section className="py-4 px-2 sm:px-4">
-      <div className="w-full">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold gradient-text text-center mb-4 sm:mb-8">
-            エンジニアチーム分析 <span className="text-xs sm:text-sm font-medium text-muted-foreground ml-2">Powered by MBTI</span>
-          </h2>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50">
-              <TabsTrigger value="setup" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs sm:text-sm py-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 sm:mr-2 hidden sm:inline-block">
+    <div className="container mx-auto px-4 py-8">
+      <Tabs 
+        defaultValue="setup" 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-2 mb-2">
+          <TabsTrigger value="setup" className="text-xs sm:text-sm">
+            チーム設定
+          </TabsTrigger>
+          <TabsTrigger value="analysis" className="text-xs sm:text-sm">
+            チーム分析
+          </TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="setup" className="mt-6">
+          {/* Team Members Selection */}
+          <Card className="shadow-md rounded-lg p-3 sm:p-6 border-border/60">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
+              <h3 className="text-base sm:text-lg font-medium gradient-text flex items-center">
+                <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                   <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
-                チームメンバー
-              </TabsTrigger>
-              <TabsTrigger value="analysis" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs sm:text-sm py-2">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 sm:mr-2 hidden sm:inline-block">
+                チームメンバー選択
+              </h3>
+              <Button 
+                onClick={() => setShowAddMemberDialog(true)}
+                className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-3 sm:py-2 px-3 sm:px-4"
+              >
+                <svg width="14" height="14" className="sm:w-4 sm:h-4 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14"></path>
+                </svg>
+                メンバー追加
+              </Button>
+            </div>
+            
+            <div className="relative">
+              <div className="sm:hidden absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10"></div>
+              <p className="text-[10px] text-gray-500 mb-1 sm:hidden">右にスワイプしてください →</p>
+              <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 scrollbar-hide pb-1">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">名前</th>
+                      <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">MBTIタイプ</th>
+                      <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
+                      <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
+                      <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
+                      <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {teamMembers.map((member) => (
+                      <tr key={member.id}>
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Avatar className="h-6 w-6 sm:h-10 sm:w-10">
+                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
+                                {getUserInitials(member.username)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="ml-2 sm:ml-4">
+                              <div className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
+                          {member.mbtiType ? (
+                            <span className={`px-1 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
+                              {member.mbtiType}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 text-[10px] sm:text-xs">未設定</span>
+                          )}
+                        </td>
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
+                          {member.skills || "未設定"}
+                        </td>
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
+                          {member.role || "未設定"}
+                        </td>
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
+                          <Checkbox 
+                            checked={member.selected}
+                            onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
+                            className="h-3 w-3 sm:h-4 sm:w-4"
+                          />
+                        </td>
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteMember(member.id)}
+                            className="text-red-600 hover:text-red-800 h-6 px-2 py-1 sm:h-8 sm:px-3 sm:py-1"
+                          >
+                            削除
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="mt-4 sm:mt-6 flex justify-center">
+              <Button 
+                onClick={handleAnalyzeTeam} 
+                className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-3 sm:py-6 px-3 sm:px-8 text-xs sm:text-base font-medium"
+              >
+                <svg width="14" height="14" className="sm:w-5 sm:h-5 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M3 3v18h18"></path>
                   <path d="M18 17V9"></path>
                   <path d="M13 17V5"></path>
                   <path d="M8 17v-3"></path>
                 </svg>
-                チーム分析
-              </TabsTrigger>
-            </TabsList>
+                チームを分析する
+              </Button>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="analysis" className="mt-6">
+          {/* Team Composition Overview */}
+          <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム構成概要</h3>
             
-            <TabsContent value="setup" className="mt-6">
-              {/* Team Members Selection */}
-              <Card className="shadow-md rounded-lg p-3 sm:p-6 border-border/60">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
-                  <h3 className="text-base sm:text-lg font-medium gradient-text flex items-center">
-                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    チームメンバー選択
-                  </h3>
-                  <Button 
-                    onClick={() => setShowAddMemberDialog(true)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-3 sm:py-2 px-3 sm:px-4"
-                  >
-                    <svg width="14" height="14" className="sm:w-4 sm:h-4 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 5v14M5 12h14"></path>
-                    </svg>
-                    メンバー追加
-                  </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {/* Team Members */}
+              <div>
+                <h4 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">チームメンバー</h4>
+                <ul className="space-y-2 sm:space-y-3">
+                  {selectedMembers.map((member) => {
+                    const suggestedRole = member.role || assignRoleByMbtiType(member.mbtiType);
+                    const roleClass = getRoleBadgeClass(suggestedRole);
+                    
+                    return (
+                      <li key={member.id} className="flex items-center">
+                        <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                          <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
+                            {getUserInitials(member.username)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="ml-2 sm:ml-3">
+                          <p className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</p>
+                          <p className="text-[10px] sm:text-xs text-gray-500">{member.mbtiType}</p>
+                        </div>
+                        <span className={`ml-auto px-1.5 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${roleClass}`}>
+                          {suggestedRole}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+              
+              {/* MBTI Distribution */}
+              <div>
+                <h4 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">MBTI分布</h4>
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1">外向型 vs 内向型 (E vs I)</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
+                        <div 
+                          className="bg-blue-600 h-2 sm:h-2.5 rounded-full" 
+                          style={{width: `${(mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100) || 0}%`}}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
+                        <span>E: {mbtiDistribution.eVsI.E}</span>
+                        <span>I: {mbtiDistribution.eVsI.I}</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1">感覚型 vs 直感型 (S vs N)</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
+                        <div 
+                          className="bg-green-600 h-2 sm:h-2.5 rounded-full" 
+                          style={{width: `${(mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100) || 0}%`}}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
+                        <span>S: {mbtiDistribution.sVsN.S}</span>
+                        <span>N: {mbtiDistribution.sVsN.N}</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1">思考型 vs 感情型 (T vs F)</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
+                        <div 
+                          className="bg-purple-600 h-2 sm:h-2.5 rounded-full" 
+                          style={{width: `${(mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100) || 0}%`}}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
+                        <span>T: {mbtiDistribution.tVsF.T}</span>
+                        <span>F: {mbtiDistribution.tVsF.F}</span>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs sm:text-sm font-medium mb-1">判断型 vs 知覚型 (J vs P)</p>
+                      <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
+                        <div 
+                          className="bg-orange-600 h-2 sm:h-2.5 rounded-full" 
+                          style={{width: `${(mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100) || 0}%`}}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
+                        <span>J: {mbtiDistribution.jVsP.J}</span>
+                        <span>P: {mbtiDistribution.jVsP.P}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                <div className="overflow-x-auto -mx-3 sm:mx-0 px-3 sm:px-0 scrollbar-hide">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">MBTIタイプ</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">スキル</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">役割</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">選択</th>
-                        <th scope="col" className="px-2 sm:px-6 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+              </div>
+            </div>
+          </Card>
+          
+          {/* Team Compatibility Matrix */}
+          <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+            <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム相性マトリックス</h3>
+            
+            <div className="relative">
+              <div className="sm:hidden absolute top-0 right-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10"></div>
+              <p className="text-[10px] text-gray-500 mb-1 sm:hidden">右にスワイプしてください →</p>
+              <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide pb-1">
+                <table className="min-w-full">
+                  <thead>
+                    <tr>
+                      <th className="w-20 sm:w-24 md:w-36 sticky left-0 bg-white z-20"></th>
+                      {selectedMembers.map((member) => (
+                        <th key={member.id} className="px-1 sm:px-2 md:px-4 py-1 md:py-2 text-center text-[10px] sm:text-xs md:text-sm">
+                          {member.username.split(' ')[0]} ({member.mbtiType})
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedMembers.map((row) => (
+                      <tr key={row.id}>
+                        <td className="px-1 sm:px-2 md:px-4 py-1 md:py-2 font-medium text-[10px] sm:text-xs md:text-sm">
+                          {row.username.split(' ')[0]} ({row.mbtiType})
+                        </td>
+                        {selectedMembers.map((col) => {
+                          // 自分自身との相性は表示しない
+                          if (row.id === col.id) {
+                            return (
+                              <td key={col.id} className="px-2 sm:px-3 md:px-4 py-1 md:py-2 text-center bg-gray-100">
+                                -
+                              </td>
+                            );
+                          }
+                          
+                          const compatibility = getCompatibility(row.mbtiType, col.mbtiType);
+                          const colorClass = getCompatibilityColorClass(compatibility);
+                          
+                          return (
+                            <td key={col.id} className={`px-2 sm:px-3 md:px-4 py-1 md:py-2 text-center ${colorClass}`}>
+                              <span className="font-medium text-[10px] sm:text-xs md:text-sm">{compatibility}</span>
+                            </td>
+                          );
+                        })}
                       </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {teamMembers.map((member) => (
-                        <tr key={member.id}>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Avatar className="h-6 w-6 sm:h-10 sm:w-10">
-                                <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
-                                  {getUserInitials(member.username)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="ml-2 sm:ml-4">
-                                <div className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</div>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </Card>
+          
+          {/* Team Strengths and Challenges */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+            {/* Strengths */}
+            <Card className="shadow-md rounded-lg p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-medium gradient-text-accent mb-3 sm:mb-4 flex items-center">
+                <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                チームの強み
+              </h3>
+              {teamStrengths.length > 0 ? (
+                <ul className="space-y-2 sm:space-y-4">
+                  {teamStrengths.map((strength) => (
+                    <li key={strength.id} className="bg-green-50 p-2 sm:p-3 rounded-lg">
+                      <div className="flex mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700 font-medium text-xs sm:text-sm">{strength.text}</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-gray-600 ml-5 sm:ml-7">{strength.detail}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-xs sm:text-sm">チームメンバーが不足しているため、強みを分析できません。</p>
+              )}
+            </Card>
+            
+            {/* Challenges */}
+            <Card className="shadow-md rounded-lg p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-medium gradient-text-accent mb-3 sm:mb-4 flex items-center">
+                <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                  <line x1="12" y1="9" x2="12" y2="13"></line>
+                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                チームの課題
+              </h3>
+              {teamChallenges.length > 0 ? (
+                <ul className="space-y-2 sm:space-y-4">
+                  {teamChallenges.map((challenge) => (
+                    <li key={challenge.id} className="bg-red-50 p-2 sm:p-3 rounded-lg">
+                      <div className="flex mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-gray-700 font-medium text-xs sm:text-sm">{challenge.text}</span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-gray-600 ml-5 sm:ml-7 mb-2">{challenge.detail}</p>
+                      <div className="bg-white p-2 rounded border border-red-100 ml-5 sm:ml-7">
+                        <p className="text-xs sm:text-sm text-gray-600 font-medium">解決策: </p>
+                        <p className="text-xs sm:text-sm text-gray-600">{challenge.solution}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-xs sm:text-sm">現在のチーム構成では特に大きな課題は見つかりませんでした。</p>
+              )}
+            </Card>
+          </div>
+          
+          {/* エンジニアリングコンテキスト特化の分析 */}
+          <div className="mt-10 sm:mt-12 mb-6 sm:mb-8">
+            <Card className="shadow-md rounded-lg p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4 flex items-center">
+                <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                  <path d="M2 2l7.586 7.586"></path>
+                  <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+                開発フェーズ別適性分析
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
+                チームメンバーのMBTIタイプとスキルを分析し、各開発フェーズにおける強みと課題を評価しています。各フェーズに対する適性度を確認できます。
+              </p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 pb-2">
+                {DEVELOPMENT_PHASES.map((phase) => {
+                  // このフェーズに適したMBTIタイプを持つメンバーの数をカウント
+                  const suitableMembers = selectedMembers.filter(member => 
+                    phase.recommendedMbtiTypes.includes(member.mbtiType)
+                  );
+                  
+                  // 適性度を計算 (0-100%)
+                  const suitabilityPercentage = Math.min(
+                    100, 
+                    Math.round((suitableMembers.length / selectedMembers.length) * 100)
+                  );
+                  
+                  // 適性度に応じたカラークラスを決定
+                  let colorClass = "bg-red-100 border-red-300";
+                  if (suitabilityPercentage >= 70) {
+                    colorClass = "bg-green-100 border-green-300";
+                  } else if (suitabilityPercentage >= 40) {
+                    colorClass = "bg-yellow-100 border-yellow-300";
+                  }
+                  
+                  return (
+                    <div key={phase.id} className={`border rounded-lg p-3 sm:p-4 ${colorClass}`}>
+                      <h4 className="text-xs sm:text-sm font-semibold mb-2 leading-tight">{phase.name}</h4>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2 mb-2 sm:mb-3">
+                        <div 
+                          className={`h-1.5 sm:h-2 rounded-full ${suitabilityPercentage >= 70 ? 'bg-green-600' : suitabilityPercentage >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                          style={{ width: `${suitabilityPercentage}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-[10px] sm:text-xs">{suitabilityPercentage}% 適合</p>
+                      
+                      <div className="mt-2 sm:mt-3">
+                        <p className="text-[10px] sm:text-xs text-gray-600 mb-1">推奨スキル:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {phase.keySkills.slice(0, 3).map((skill, index) => (
+                            <span key={index} className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-white/70 rounded-full truncate">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold mb-3">チームの強みフェーズ</h4>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  {selectedMembers.length > 0 ? (
+                    <>
+                      <p className="text-sm mb-2">
+                        現在のチーム構成では
+                        <span className="font-medium"> {getTeamStrengthPhase()} </span>
+                        が最も強みを発揮できるフェーズです。
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        チームメンバーのMBTIタイプ分布とスキルセットから分析しています。特に重要な開発フェーズがある場合は、そのフェーズに適したメンバーを追加することを検討してください。
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      チームメンバーが選択されていないため、分析できません。
+                    </p>
+                  )}
+                </div>
+              </div>
+            </Card>
+          </div>
+          
+          {/* プロジェクト種別に応じた推奨チーム構成 */}
+          <div className="mb-8">
+            <Card className="shadow-md rounded-lg p-6">
+              <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-blue-600">
+                  <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                  <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                </svg>
+                プロジェクト適合性分析
+              </h3>
+              <p className="text-sm text-gray-600 mb-6">
+                現在のチーム構成が、異なるタイプのプロジェクトにどれだけ適しているかを評価しています。プロジェクトタイプごとの適合度と、最適なチーム構成のためのギャップを確認できます。
+              </p>
+              
+              <div className="space-y-8">
+                {PROJECT_TYPES.map((projectType) => {
+                  // 現在のMBTI分布と理想的な分布のギャップを計算
+                  const mbtiGap = calculateMbtiGap(mbtiDistribution, projectType.idealMbtiDistribution);
+                  // スキルギャップを計算
+                  const skillGap = calculateSkillGap(selectedMembers, projectType.keySkills);
+                  // 総合適合度を計算 (0-100%)
+                  const overallFitPercentage = Math.max(0, 100 - (mbtiGap * 0.6 + skillGap * 0.4));
+                  
+                  return (
+                    <div key={projectType.id} className="border border-gray-200 rounded-lg p-5">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h4 className="text-md font-medium">{projectType.name}</h4>
+                          <p className="text-sm text-gray-600 mt-1">{projectType.description}</p>
+                        </div>
+                        <div className={`text-xl font-bold ${getProjectFitColorClass(overallFitPercentage)}`}>
+                          {Math.round(overallFitPercentage)}%
+                        </div>
+                      </div>
+                      
+                      <div className="mb-4">
+                        <p className="text-xs text-gray-500 mb-1">総合適合度</p>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                          <div 
+                            className={`h-3 rounded-full ${getProjectFitGradient(overallFitPercentage)}`} 
+                            style={{ width: `${overallFitPercentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
+                        <div>
+                          <h5 className="text-sm font-medium mb-3">推奨役割とスキル</h5>
+                          <div className="bg-blue-50 p-3 rounded-lg">
+                            <div className="mb-3">
+                              <p className="text-xs text-blue-800 mb-1">主要役割</p>
+                              <div className="flex flex-wrap gap-1">
+                                {projectType.recommendedRoles.map((role, idx) => (
+                                  <span key={idx} className={`text-xs px-2 py-1 rounded-full ${
+                                    hasRoleInTeam(role) ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    {role} {hasRoleInTeam(role) && '✓'}
+                                  </span>
+                                ))}
                               </div>
                             </div>
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                            {member.mbtiType ? (
-                              <span className={`px-1 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
-                                {member.mbtiType}
-                              </span>
-                            ) : (
-                              <span className="text-gray-400 text-[10px] sm:text-xs">未設定</span>
-                            )}
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
-                            {member.skills || "未設定"}
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">
-                            {member.role || "未設定"}
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
-                            <Checkbox 
-                              checked={member.selected}
-                              onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
-                              className="h-3 w-3 sm:h-4 sm:w-4"
-                            />
-                          </td>
-                          <td className="px-2 sm:px-6 py-2 sm:py-4 whitespace-nowrap text-[10px] sm:text-sm font-medium">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleDeleteMember(member.id)}
-                              className="text-red-600 hover:text-red-800 h-6 px-2 py-1 sm:h-8 sm:px-3 sm:py-1"
-                            >
-                              削除
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                
-                <div className="mt-4 sm:mt-6 flex justify-center">
-                  <Button 
-                    onClick={handleAnalyzeTeam} 
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 shadow-lg py-3 sm:py-6 px-3 sm:px-8 text-xs sm:text-base font-medium"
-                  >
-                    <svg width="14" height="14" className="sm:w-5 sm:h-5 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M3 3v18h18"></path>
-                      <path d="M18 17V9"></path>
-                      <path d="M13 17V5"></path>
-                      <path d="M8 17v-3"></path>
-                    </svg>
-                    チームを分析する
-                  </Button>
-                </div>
-              </Card>
-            </TabsContent>
+                            <div>
+                              <p className="text-xs text-blue-800 mb-1">必要スキル</p>
+                              <div className="flex flex-wrap gap-1">
+                                {projectType.keySkills.map((skill, idx) => (
+                                  <span key={idx} className={`text-xs px-2 py-1 rounded-full ${
+                                    hasSkillInTeam(skill) ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    {skill} {hasSkillInTeam(skill) && '✓'}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h5 className="text-sm font-medium mb-3">MBTIタイプ適合性</h5>
+                          <div className="bg-purple-50 p-3 rounded-lg">
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <p className="text-xs text-purple-800 mb-1">E vs I</p>
+                                <div className="flex items-center">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                                    <div className="bg-purple-500 h-2 rounded-full" 
+                                      style={{ width: `${mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100}%` }}></div>
+                                  </div>
+                                  <div className="ml-2 text-xs">
+                                    {Math.round(mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100 || 0)}%
+                                  </div>
+                                </div>
+                                <div className="flex justify-between text-xs mt-1">
+                                  <span>E</span>
+                                  <span>I</span>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <p className="text-xs text-purple-800 mb-1">S vs N</p>
+                                <div className="flex items-center">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                                    <div className="bg-purple-500 h-2 rounded-full" 
+                                      style={{ width: `${mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100}%` }}></div>
+                                  </div>
+                                  <div className="ml-2 text-xs">
+                                    {Math.round(mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100 || 0)}%
+                                  </div>
+                                </div>
+                                <div className="flex justify-between text-xs mt-1">
+                                  <span>S</span>
+                                  <span>N</span>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <p className="text-xs text-purple-800 mb-1">T vs F</p>
+                                <div className="flex items-center">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                                    <div className="bg-purple-500 h-2 rounded-full" 
+                                      style={{ width: `${mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100}%` }}></div>
+                                  </div>
+                                  <div className="ml-2 text-xs">
+                                    {Math.round(mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100 || 0)}%
+                                  </div>
+                                </div>
+                                <div className="flex justify-between text-xs mt-1">
+                                  <span>T</span>
+                                  <span>F</span>
+                                </div>
+                              </div>
+                              
+                              <div>
+                                <p className="text-xs text-purple-800 mb-1">J vs P</p>
+                                <div className="flex items-center">
+                                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                                    <div className="bg-purple-500 h-2 rounded-full" 
+                                      style={{ width: `${mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100}%` }}></div>
+                                  </div>
+                                  <div className="ml-2 text-xs">
+                                    {Math.round(mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100 || 0)}%
+                                  </div>
+                                </div>
+                                <div className="flex justify-between text-xs mt-1">
+                                  <span>J</span>
+                                  <span>P</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-50 p-4 rounded-lg mt-5">
+                        <h5 className="text-sm font-medium mb-2">推奨事項</h5>
+                        {getBestRecommendation(projectType)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          </div>
+          
+          {/* Additional Analysis */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 mb-6 sm:mb-8">
+            {/* Team Abilities Radar Chart */}
+            <Card className="shadow-md rounded-lg p-4 sm:p-6 md:col-span-2">
+              <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム能力分析</h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-4">
+                MBTIタイプに基づく各メンバーのスキルセットとチーム全体の能力バランスを視覚化しています。
+              </p>
+              
+              <div className="h-64 sm:h-80">
+                {selectedMembers.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={teamRadarData}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="axis" tick={{ fill: '#6b7280', fontSize: 12 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 10]} />
+                      <Radar name="チーム平均" dataKey="value" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.6} />
+                      <Tooltip />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center">
+                    <p className="text-gray-500 text-sm">
+                      チームメンバーが選択されていないため、分析できません。
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
             
-            <TabsContent value="analysis" className="mt-6">
-              {/* Team Composition Overview */}
-              <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-                <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム構成概要</h3>
+            {/* Team Metrics */}
+            <Card className="shadow-md rounded-lg p-4 sm:p-6">
+              <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チームメトリクス</h3>
+              
+              <div className="space-y-6">
+                {/* Team Cohesion */}
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-700">チーム統合指数</h4>
+                    <span className={`text-sm font-bold ${
+                      cohesionScore >= 70 ? 'text-green-600' : 
+                      cohesionScore >= 40 ? 'text-yellow-600' : 
+                      'text-red-600'
+                    }`}>
+                      {cohesionScore}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className={`h-2.5 rounded-full ${
+                        cohesionScore >= 70 ? 'bg-green-600' : 
+                        cohesionScore >= 40 ? 'bg-yellow-500' : 
+                        'bg-red-500'
+                      }`}
+                      style={{ width: `${cohesionScore}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">
+                    メンバー間の相性と協力関係の評価です。高いほどチームとしての一体感が強く、効率的に協働できます。
+                  </p>
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                  {/* Team Members */}
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">チームメンバー</h4>
-                    <ul className="space-y-2 sm:space-y-3">
-                      {selectedMembers.map((member) => {
-                        const suggestedRole = member.role || assignRoleByMbtiType(member.mbtiType);
-                        const roleClass = getRoleBadgeClass(suggestedRole);
+                {/* Team Diversity */}
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <h4 className="text-sm font-medium text-gray-700">チーム多様性指数</h4>
+                    <span className={`text-sm font-bold ${
+                      diversityScore >= 70 ? 'text-green-600' : 
+                      diversityScore >= 40 ? 'text-yellow-600' : 
+                      'text-red-600'
+                    }`}>
+                      {diversityScore}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div 
+                      className={`h-2.5 rounded-full ${
+                        diversityScore >= 70 ? 'bg-green-600' : 
+                        diversityScore >= 40 ? 'bg-yellow-500' : 
+                        'bg-red-500'
+                      }`}
+                      style={{ width: `${diversityScore}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-2">
+                    MBTIタイプとスキルの多様性の評価です。高いほど様々な視点やアプローチが期待でき、創造的な問題解決が可能になります。
+                  </p>
+                </div>
+                
+                {/* Individual Contributions */}
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">メンバー貢献度</h4>
+                  {selectedMembers.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedMembers.map(member => {
+                        // 個人のスキルセットの多様性を簡易評価 (1-10)
+                        const skillDiversity = member.skills ? 
+                          Math.min(10, member.skills.length * 2) : 3;
+                        
+                        // MBTIタイプに基づく適性評価
+                        let aptitudeScore = 5; // デフォルト値
+                        const mbti = member.mbtiType;
+                        
+                        if (mbti.includes("NT")) aptitudeScore += 2;
+                        if (mbti.includes("SJ")) aptitudeScore += 1;
+                        if (mbti.includes("NF")) aptitudeScore += 1;
+                        if (mbti.startsWith("E")) aptitudeScore += 1;
+                        
+                        // 総合的な貢献度スコア (30-100)
+                        const contributionScore = Math.min(100, 30 + 
+                          skillDiversity * 3 + aptitudeScore * 4);
                         
                         return (
-                          <li key={member.id} className="flex items-center">
-                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-[10px] sm:text-sm">
+                          <div key={member.id} className="flex items-center">
+                            <Avatar className="h-6 w-6">
+                              <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
                                 {getUserInitials(member.username)}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="ml-2 sm:ml-3">
-                              <p className="text-xs sm:text-sm font-medium text-gray-900">{member.username}</p>
-                              <p className="text-[10px] sm:text-xs text-gray-500">{member.mbtiType}</p>
+                            <span className="ml-2 text-xs w-20 truncate">{member.username.split(' ')[0]}</span>
+                            <div className="flex-1 ml-2">
+                              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                <div 
+                                  className="bg-blue-600 h-1.5 rounded-full" 
+                                  style={{ width: `${contributionScore}%` }}
+                                ></div>
+                              </div>
                             </div>
-                            <span className={`ml-auto px-1.5 sm:px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full ${roleClass}`}>
-                              {suggestedRole}
-                            </span>
-                          </li>
+                            <span className="ml-2 text-xs font-medium">{Math.round(contributionScore)}%</span>
+                          </div>
                         );
                       })}
-                    </ul>
-                  </div>
-                  
-                  {/* MBTI Distribution */}
-                  <div>
-                    <h4 className="text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider mb-2 sm:mb-3">MBTI分布</h4>
-                    <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
-                      <div className="space-y-3 sm:space-y-4">
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium mb-1">外向型 vs 内向型 (E vs I)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
-                            <div 
-                              className="bg-blue-600 h-2 sm:h-2.5 rounded-full" 
-                              style={{width: `${(mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100) || 0}%`}}
-                            ></div>
-                          </div>
-                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
-                            <span>E: {mbtiDistribution.eVsI.E}</span>
-                            <span>I: {mbtiDistribution.eVsI.I}</span>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium mb-1">感覚型 vs 直感型 (S vs N)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
-                            <div 
-                              className="bg-green-600 h-2 sm:h-2.5 rounded-full" 
-                              style={{width: `${(mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100) || 0}%`}}
-                            ></div>
-                          </div>
-                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
-                            <span>S: {mbtiDistribution.sVsN.S}</span>
-                            <span>N: {mbtiDistribution.sVsN.N}</span>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium mb-1">思考型 vs 感情型 (T vs F)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
-                            <div 
-                              className="bg-purple-600 h-2 sm:h-2.5 rounded-full" 
-                              style={{width: `${(mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100) || 0}%`}}
-                            ></div>
-                          </div>
-                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
-                            <span>T: {mbtiDistribution.tVsF.T}</span>
-                            <span>F: {mbtiDistribution.tVsF.F}</span>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium mb-1">判断型 vs 知覚型 (J vs P)</p>
-                          <div className="w-full bg-gray-200 rounded-full h-2 sm:h-2.5">
-                            <div 
-                              className="bg-orange-600 h-2 sm:h-2.5 rounded-full" 
-                              style={{width: `${(mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100) || 0}%`}}
-                            ></div>
-                          </div>
-                          <div className="flex justify-between text-[10px] sm:text-xs text-gray-500 mt-1">
-                            <span>J: {mbtiDistribution.jVsP.J}</span>
-                            <span>P: {mbtiDistribution.jVsP.P}</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                </div>
-              </Card>
-              
-              {/* Team Compatibility Matrix */}
-              <Card className="shadow-md rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-                <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4">チーム相性マトリックス</h3>
-                
-                <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0 scrollbar-hide">
-                  <table className="min-w-full">
-                    <thead>
-                      <tr>
-                        <th className="w-20 sm:w-24 md:w-36"></th>
-                        {selectedMembers.map((member) => (
-                          <th key={member.id} className="px-1 sm:px-2 md:px-4 py-1 md:py-2 text-center text-[10px] sm:text-xs md:text-sm">
-                            {member.username.split(' ')[0]} ({member.mbtiType})
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedMembers.map((row) => (
-                        <tr key={row.id}>
-                          <td className="px-1 sm:px-2 md:px-4 py-1 md:py-2 font-medium text-[10px] sm:text-xs md:text-sm">
-                            {row.username.split(' ')[0]} ({row.mbtiType})
-                          </td>
-                          {selectedMembers.map((col) => {
-                            // 自分自身との相性は表示しない
-                            if (row.id === col.id) {
-                              return (
-                                <td key={col.id} className="px-2 sm:px-3 md:px-4 py-1 md:py-2 text-center bg-gray-100">
-                                  -
-                                </td>
-                              );
-                            }
-                            
-                            const compatibility = getCompatibility(row.mbtiType, col.mbtiType);
-                            const colorClass = getCompatibilityColorClass(compatibility);
-                            
-                            return (
-                              <td key={col.id} className={`px-2 sm:px-3 md:px-4 py-1 md:py-2 text-center ${colorClass}`}>
-                                <span className="font-medium text-[10px] sm:text-xs md:text-sm">{compatibility}</span>
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-              
-              {/* Team Strengths and Challenges */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-                {/* Strengths */}
-                <Card className="shadow-md rounded-lg p-4 sm:p-6">
-                  <h3 className="text-base sm:text-lg font-medium gradient-text-accent mb-3 sm:mb-4 flex items-center">
-                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                    チームの強み
-                  </h3>
-                  {teamStrengths.length > 0 ? (
-                    <ul className="space-y-2 sm:space-y-4">
-                      {teamStrengths.map((strength) => (
-                        <li key={strength.id} className="bg-green-50 p-2 sm:p-3 rounded-lg">
-                          <div className="flex mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-gray-700 font-medium text-xs sm:text-sm">{strength.text}</span>
-                          </div>
-                          <p className="text-xs sm:text-sm text-gray-600 ml-5 sm:ml-7">{strength.detail}</p>
-                        </li>
-                      ))}
-                    </ul>
                   ) : (
-                    <p className="text-gray-500 text-xs sm:text-sm">チームメンバーが不足しているため、強みを分析できません。</p>
+                    <p className="text-xs text-gray-500">
+                      チームメンバーが選択されていません。
+                    </p>
                   )}
-                </Card>
-                
-                {/* Challenges */}
-                <Card className="shadow-md rounded-lg p-4 sm:p-6">
-                  <h3 className="text-base sm:text-lg font-medium gradient-text-accent mb-3 sm:mb-4 flex items-center">
-                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                      <line x1="12" y1="9" x2="12" y2="13"></line>
-                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                    チームの課題
-                  </h3>
-                  {teamChallenges.length > 0 ? (
-                    <ul className="space-y-2 sm:space-y-4">
-                      {teamChallenges.map((challenge) => (
-                        <li key={challenge.id} className="bg-red-50 p-2 sm:p-3 rounded-lg">
-                          <div className="flex mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-gray-700 font-medium text-xs sm:text-sm">{challenge.text}</span>
-                          </div>
-                          <p className="text-xs sm:text-sm text-gray-600 ml-5 sm:ml-7 mb-2">{challenge.detail}</p>
-                          <div className="bg-white p-2 rounded border border-red-100 ml-5 sm:ml-7">
-                            <p className="text-xs sm:text-sm text-gray-600 font-medium">解決策: </p>
-                            <p className="text-xs sm:text-sm text-gray-600">{challenge.solution}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-500 text-xs sm:text-sm">現在のチーム構成では特に大きな課題は見つかりませんでした。</p>
-                  )}
-                </Card>
+                </div>
               </div>
-              
-              {/* エンジニアリングコンテキスト特化の分析 */}
-              <div className="mt-10 sm:mt-12 mb-6 sm:mb-8">
-                <Card className="shadow-md rounded-lg p-4 sm:p-6">
-                  <h3 className="text-base sm:text-lg font-medium gradient-text mb-3 sm:mb-4 flex items-center">
-                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                      <path d="M2 2l7.586 7.586"></path>
-                      <circle cx="11" cy="11" r="2"></circle>
-                    </svg>
-                    開発フェーズ別適性分析
-                  </h3>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
-                    チームメンバーのMBTIタイプとスキルを分析し、各開発フェーズにおける強みと課題を評価しています。各フェーズに対する適性度を確認できます。
-                  </p>
-                  
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8 overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 pb-2">
-                    {DEVELOPMENT_PHASES.map((phase) => {
-                      // このフェーズに適したMBTIタイプを持つメンバーの数をカウント
-                      const suitableMembers = selectedMembers.filter(member => 
-                        phase.recommendedMbtiTypes.includes(member.mbtiType)
-                      );
-                      
-                      // 適性度を計算 (0-100%)
-                      const suitabilityPercentage = Math.min(
-                        100, 
-                        Math.round((suitableMembers.length / selectedMembers.length) * 100)
-                      );
-                      
-                      // 適性度に応じたカラークラスを決定
-                      let colorClass = "bg-red-100 border-red-300";
-                      if (suitabilityPercentage >= 70) {
-                        colorClass = "bg-green-100 border-green-300";
-                      } else if (suitabilityPercentage >= 40) {
-                        colorClass = "bg-yellow-100 border-yellow-300";
-                      }
-                      
-                      return (
-                        <div key={phase.id} className={`border rounded-lg p-3 sm:p-4 ${colorClass}`}>
-                          <h4 className="text-xs sm:text-sm font-semibold mb-2 leading-tight">{phase.name}</h4>
-                          <div className="w-full bg-gray-200 rounded-full h-1.5 sm:h-2 mb-2 sm:mb-3">
-                            <div 
-                              className={`h-1.5 sm:h-2 rounded-full ${suitabilityPercentage >= 70 ? 'bg-green-600' : suitabilityPercentage >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
-                              style={{ width: `${suitabilityPercentage}%` }}
-                            ></div>
-                          </div>
-                          <p className="text-[10px] sm:text-xs">{suitabilityPercentage}% 適合</p>
-                          
-                          <div className="mt-2 sm:mt-3">
-                            <p className="text-[10px] sm:text-xs text-gray-600 mb-1">推奨スキル:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {phase.keySkills.slice(0, 3).map((skill, index) => (
-                                <span key={index} className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-white/70 rounded-full truncate">
-                                  {skill}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  <div className="mt-6">
-                    <h4 className="text-sm font-semibold mb-3">チームの強みフェーズ</h4>
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      {selectedMembers.length > 0 ? (
-                        <>
-                          <p className="text-sm mb-2">
-                            現在のチーム構成では
-                            <span className="font-medium"> {getTeamStrengthPhase()} </span>
-                            が最も強みを発揮できるフェーズです。
-                          </p>
-                          <p className="text-xs text-gray-600">
-                            チームメンバーのMBTIタイプ分布とスキルセットから分析しています。特に重要な開発フェーズがある場合は、そのフェーズに適したメンバーを追加することを検討してください。
-                          </p>
-                        </>
-                      ) : (
-                        <p className="text-sm text-gray-500">
-                          チームメンバーが選択されていないため、分析できません。
-                        </p>
-                      )}
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      {/* Add Member Dialog */}
+      <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>チームメンバーを追加</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">名前</Label>
+              <Input
+                id="name"
+                className="w-full"
+                value={newMember.name}
+                onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
+                placeholder="山田 太郎"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="mbtiType">MBTIタイプ</Label>
+              <Select
+                value={newMember.mbtiType}
+                onValueChange={(value) => setNewMember({ ...newMember, mbtiType: value })}
+              >
+                <SelectTrigger id="mbtiType">
+                  <SelectValue placeholder="MBTIタイプを選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="INTJ">INTJ - 建築家</SelectItem>
+                  <SelectItem value="INTP">INTP - 論理学者</SelectItem>
+                  <SelectItem value="ENTJ">ENTJ - 指揮官</SelectItem>
+                  <SelectItem value="ENTP">ENTP - 討論者</SelectItem>
+                  <SelectItem value="INFJ">INFJ - 提唱者</SelectItem>
+                  <SelectItem value="INFP">INFP - 仲介者</SelectItem>
+                  <SelectItem value="ENFJ">ENFJ - 主人公</SelectItem>
+                  <SelectItem value="ENFP">ENFP - 広報運動家</SelectItem>
+                  <SelectItem value="ISTJ">ISTJ - 管理者</SelectItem>
+                  <SelectItem value="ISFJ">ISFJ - 擁護者</SelectItem>
+                  <SelectItem value="ESTJ">ESTJ - 幹部</SelectItem>
+                  <SelectItem value="ESFJ">ESFJ - 領事官</SelectItem>
+                  <SelectItem value="ISTP">ISTP - 巨匠</SelectItem>
+                  <SelectItem value="ISFP">ISFP - 冒険家</SelectItem>
+                  <SelectItem value="ESTP">ESTP - 起業家</SelectItem>
+                  <SelectItem value="ESFP">ESFP - エンターテイナー</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">役割</Label>
+              <Select
+                value={newMember.role}
+                onValueChange={(value) => setNewMember({ ...newMember, role: value })}
+              >
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="役割を選択" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ROLE_OPTIONS.map((role) => (
+                    <SelectItem key={role} value={role}>{role}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>スキル</Label>
+              <div className="border rounded-md p-3 h-32 overflow-y-auto">
+                <div className="flex flex-wrap gap-2">
+                  {SKILL_OPTIONS.map((skill) => (
+                    <div
+                      key={skill}
+                      onClick={() => toggleSkill(skill)}
+                      className={`cursor-pointer text-xs px-2 py-1 rounded-full ${
+                        isSkillSelected(skill) 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                      }`}
+                    >
+                      {skill}
                     </div>
-                  </div>
-                </Card>
+                  ))}
+                </div>
               </div>
-              
-              {/* プロジェクト種別に応じた推奨チーム構成 */}
-              <div className="mb-8">
-                <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-blue-600">
-                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                    </svg>
-                    プロジェクト適合性分析
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-6">
-                    現在のチーム構成が、異なるタイプのプロジェクトにどれだけ適しているかを評価しています。プロジェクトタイプごとの適合度と、最適なチーム構成のためのギャップを確認できます。
-                  </p>
-                  
-                  <div className="space-y-8">
-                    {PROJECT_TYPES.map((projectType) => {
-                      // 現在のMBTI分布と理想的な分布のギャップを計算
-                      const mbtiGap = calculateMbtiGap(mbtiDistribution, projectType.idealMbtiDistribution);
-                      // スキルギャップを計算
-                      const skillGap = calculateSkillGap(selectedMembers, projectType.keySkills);
-                      // 総合適合度を計算 (0-100%)
-                      const overallFitPercentage = Math.max(0, 100 - (mbtiGap * 0.6 + skillGap * 0.4));
-                      
-                      return (
-                        <div key={projectType.id} className="border border-gray-200 rounded-lg p-5">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h4 className="text-md font-medium">{projectType.name}</h4>
-                              <p className="text-sm text-gray-600 mt-1">{projectType.description}</p>
-                            </div>
-                            <div className={`text-xl font-bold ${getProjectFitColorClass(overallFitPercentage)}`}>
-                              {Math.round(overallFitPercentage)}%
-                            </div>
-                          </div>
-                          
-                          <div className="mb-4">
-                            <p className="text-xs text-gray-500 mb-1">総合適合度</p>
-                            <div className="w-full bg-gray-200 rounded-full h-3">
-                              <div 
-                                className={`h-3 rounded-full ${getProjectFitGradient(overallFitPercentage)}`} 
-                                style={{ width: `${overallFitPercentage}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
-                            <div>
-                              <h5 className="text-sm font-medium mb-3">推奨役割とスキル</h5>
-                              <div className="bg-blue-50 p-3 rounded-lg">
-                                <div className="mb-3">
-                                  <p className="text-xs text-blue-800 mb-1">主要役割</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {projectType.recommendedRoles.map((role, idx) => (
-                                      <span key={idx} className={`text-xs px-2 py-1 rounded-full ${
-                                        hasRoleInTeam(role) ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
-                                      }`}>
-                                        {role} {hasRoleInTeam(role) && '✓'}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                                <div>
-                                  <p className="text-xs text-blue-800 mb-1">必要スキル</p>
-                                  <div className="flex flex-wrap gap-1">
-                                    {projectType.keySkills.map((skill, idx) => (
-                                      <span key={idx} className={`text-xs px-2 py-1 rounded-full ${
-                                        hasSkillInTeam(skill) ? 'bg-blue-200 text-blue-800' : 'bg-gray-100 text-gray-600'
-                                      }`}>
-                                        {skill} {hasSkillInTeam(skill) && '✓'}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            <div>
-                              <h5 className="text-sm font-medium mb-3">MBTIタイプ適合性</h5>
-                              <div className="bg-purple-50 p-3 rounded-lg">
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <p className="text-xs text-purple-800 mb-1">E vs I</p>
-                                    <div className="flex items-center">
-                                      <div className="w-full h-2 bg-gray-200 rounded-full">
-                                        <div className="bg-purple-500 h-2 rounded-full" 
-                                          style={{ width: `${mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100}%` }}></div>
-                                      </div>
-                                      <div className="ml-2 text-xs">
-                                        {Math.round(mbtiDistribution.eVsI.E / (mbtiDistribution.eVsI.E + mbtiDistribution.eVsI.I) * 100 || 0)}%
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-between text-xs mt-1">
-                                      <span>E</span>
-                                      <span>I</span>
-                                    </div>
-                                  </div>
-                                  
-                                  <div>
-                                    <p className="text-xs text-purple-800 mb-1">S vs N</p>
-                                    <div className="flex items-center">
-                                      <div className="w-full h-2 bg-gray-200 rounded-full">
-                                        <div className="bg-purple-500 h-2 rounded-full" 
-                                          style={{ width: `${mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100}%` }}></div>
-                                      </div>
-                                      <div className="ml-2 text-xs">
-                                        {Math.round(mbtiDistribution.sVsN.S / (mbtiDistribution.sVsN.S + mbtiDistribution.sVsN.N) * 100 || 0)}%
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-between text-xs mt-1">
-                                      <span>S</span>
-                                      <span>N</span>
-                                    </div>
-                                  </div>
-                                  
-                                  <div>
-                                    <p className="text-xs text-purple-800 mb-1">T vs F</p>
-                                    <div className="flex items-center">
-                                      <div className="w-full h-2 bg-gray-200 rounded-full">
-                                        <div className="bg-purple-500 h-2 rounded-full" 
-                                          style={{ width: `${mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100}%` }}></div>
-                                      </div>
-                                      <div className="ml-2 text-xs">
-                                        {Math.round(mbtiDistribution.tVsF.T / (mbtiDistribution.tVsF.T + mbtiDistribution.tVsF.F) * 100 || 0)}%
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-between text-xs mt-1">
-                                      <span>T</span>
-                                      <span>F</span>
-                                    </div>
-                                  </div>
-                                  
-                                  <div>
-                                    <p className="text-xs text-purple-800 mb-1">J vs P</p>
-                                    <div className="flex items-center">
-                                      <div className="w-full h-2 bg-gray-200 rounded-full">
-                                        <div className="bg-purple-500 h-2 rounded-full" 
-                                          style={{ width: `${mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100}%` }}></div>
-                                      </div>
-                                      <div className="ml-2 text-xs">
-                                        {Math.round(mbtiDistribution.jVsP.J / (mbtiDistribution.jVsP.J + mbtiDistribution.jVsP.P) * 100 || 0)}%
-                                      </div>
-                                    </div>
-                                    <div className="flex justify-between text-xs mt-1">
-                                      <span>J</span>
-                                      <span>P</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="mt-5">
-                            <h5 className="text-sm font-medium mb-2">ギャップ分析</h5>
-                            <div className="bg-gray-50 p-3 rounded-lg">
-                              {getBestRecommendation(projectType)}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Card>
-              </div>
-              
-              {/* チーム関係性の視覚化 */}
-              <div className="mb-8">
-                <Card className="shadow-md rounded-lg p-6">
-                  <h3 className="text-lg font-medium gradient-text mb-4 flex items-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-green-600">
-                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                      <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                    </svg>
-                    チーム構成可視化
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-6">
-                    チームメンバー間の相性と相互関係を視覚的に表現しています。チーム全体の強みと弱みの分布が一目でわかります。
-                  </p>
-                  
-                  <div className="h-80 w-full">
-                    {selectedMembers.length > 0 ? (
-                      <ResponsiveContainer width="100%" height="100%">
-                        <RadarChart cx="50%" cy="50%" outerRadius="80%" data={getTeamRadarData()}>
-                          <PolarGrid />
-                          <PolarAngleAxis dataKey="axis" />
-                          <PolarRadiusAxis angle={30} domain={[0, 10]} />
-                          <Radar
-                            name="チーム平均"
-                            dataKey="value"
-                            stroke="#8884d8"
-                            fill="#8884d8"
-                            fillOpacity={0.6}
-                          />
-                          <Tooltip />
-                          <Legend />
-                        </RadarChart>
-                      </ResponsiveContainer>
-                    ) : (
-                      <div className="h-full flex items-center justify-center">
-                        <p className="text-gray-500">チームメンバーが選択されていないため、表示できません</p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-4 rounded-lg">
-                      <h4 className="text-sm font-semibold mb-3 text-blue-800">チーム統合指数</h4>
-                      <div className="flex items-center mb-3">
-                        <div className="w-full h-3 bg-gray-200 rounded-full mr-4">
-                          <div 
-                            className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600" 
-                            style={{ width: `${getTeamCohesionScore()}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-lg font-bold">{getTeamCohesionScore()}%</span>
-                      </div>
-                      <p className="text-xs text-gray-600">
-                        チームメンバー間のMBTI相性とスキル補完性から算出したチーム統合指数です。
-                        数値が高いほど、チームとしての一体感や協力関係が構築しやすいことを示しています。
-                      </p>
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-green-50 to-blue-50 p-4 rounded-lg">
-                      <h4 className="text-sm font-semibold mb-3 text-green-800">チーム多様性指数</h4>
-                      <div className="flex items-center mb-3">
-                        <div className="w-full h-3 bg-gray-200 rounded-full mr-4">
-                          <div 
-                            className="h-3 rounded-full bg-gradient-to-r from-green-500 to-blue-500" 
-                            style={{ width: `${getTeamDiversityScore()}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-lg font-bold">{getTeamDiversityScore()}%</span>
-                      </div>
-                      <p className="text-xs text-gray-600">
-                        チーム内のMBTIタイプやスキルの多様性から算出した指数です。
-                        数値が高いほど、多角的な視点や幅広いスキルセットを持つチームであることを示しています。
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-              
-              <div className="mt-8 flex justify-center">
-                <Button 
-                  onClick={() => setActiveTab("setup")}
-                  variant="outline"
-                  className="border-indigo-300 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-400 text-indigo-700 shadow-sm text-sm py-5 px-6"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                    <polyline points="15 18 9 12 15 6"></polyline>
-                  </svg>
-                  チーム編成に戻る
+              <div className="flex justify-end">
+                <Button variant="ghost" size="sm" onClick={clearSelectedSkills}>
+                  クリア
                 </Button>
               </div>
-            </TabsContent>
-          </Tabs>
-          
-          {/* Add Member Dialog */}
-          <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="flex items-center">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-primary">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <line x1="20" y1="8" x2="20" y2="14"></line>
-                    <line x1="23" y1="11" x2="17" y2="11"></line>
-                  </svg>
-                  新しいメンバーを追加
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">名前</Label>
-                  <Input
-                    id="name"
-                    value={newMember.name}
-                    onChange={(e) => setNewMember(prev => ({ ...prev, name: e.target.value }))}
-                  />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="mbti-type">MBTIタイプ</Label>
-                  <Select
-                    value={newMember.mbtiType}
-                    onValueChange={(value) => setNewMember(prev => ({ ...prev, mbtiType: value }))}
-                  >
-                    <SelectTrigger id="mbti-type">
-                      <SelectValue placeholder="MBTIタイプを選択" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'].map((type) => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="role">役割</Label>
-                  <Select
-                    value={newMember.role}
-                    onValueChange={(value) => setNewMember(prev => ({ ...prev, role: value }))}
-                  >
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="役割を選択" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ROLE_OPTIONS.map((role) => (
-                        <SelectItem key={role} value={role}>{role}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="skills">スキル・強み（複数選択可）</Label>
-                  <div className="border p-3 rounded-md h-40 overflow-y-auto grid grid-cols-2 gap-2">
-                    {SKILL_OPTIONS.map((skill) => (
-                      <div key={skill} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={`skill-${skill}`} 
-                          checked={isSkillSelected(skill)}
-                          onCheckedChange={() => toggleSkill(skill)}
-                        />
-                        <label 
-                          htmlFor={`skill-${skill}`}
-                          className="text-sm font-medium leading-none cursor-pointer"
-                        >
-                          {skill}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">
-                      {selectedSkills.length === 0 ? 'スキルが選択されていません' : `${selectedSkills.length}個のスキルが選択されました`}
-                    </span>
-                    {selectedSkills.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={clearSelectedSkills}
-                      >
-                        クリア
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button 
-                  type="submit" 
-                  onClick={handleAddNewMember} 
-                  disabled={!newMember.name || !newMember.mbtiType}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                    <path d="M12 5v14M5 12h14"></path>
-                  </svg>
-                  メンバーを追加
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-    </section>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAddMemberDialog(false)}
+            >
+              キャンセル
+            </Button>
+            <Button 
+              onClick={handleAddNewMember}
+              disabled={!newMember.name || !newMember.mbtiType}
+            >
+              追加
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
