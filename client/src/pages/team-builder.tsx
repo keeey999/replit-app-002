@@ -1088,25 +1088,29 @@ export default function TeamBuilder() {
             <TabsContent value="setup" className="mt-6">
               {/* Team Members Selection */}
               <Card className="shadow-md rounded-lg p-3 sm:p-6 border-border/60">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mb-4">
-                  <h3 className="text-base sm:text-lg font-medium gradient-text flex items-center">
-                    <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    チームメンバー選択
-                  </h3>
-                  <Button 
-                    onClick={() => setShowAddMemberDialog(true)}
-                    className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-3 sm:py-2 px-3 sm:px-4 w-40 sm:w-48 md:w-56"
-                  >
-                    <svg width="14" height="14" className="sm:w-4 sm:h-4 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 5v14M5 12h14"></path>
-                    </svg>
-                    メンバー追加
-                  </Button>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-base sm:text-lg font-medium gradient-text flex items-center">
+                      <svg width="16" height="16" className="sm:w-5 sm:h-5 mr-1 sm:mr-2 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
+                      チームメンバー選択
+                    </h3>
+                  </div>
+                  <div className="flex justify-center sm:justify-end mb-4">
+                    <Button 
+                      onClick={() => setShowAddMemberDialog(true)}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white shadow-md text-xs sm:text-sm py-3 sm:py-2 px-3 sm:px-4 w-40 sm:w-48 md:w-56"
+                    >
+                      <svg width="14" height="14" className="sm:w-4 sm:h-4 mr-1 sm:mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 5v14M5 12h14"></path>
+                      </svg>
+                      メンバー追加
+                    </Button>
+                  </div>
                 </div>
                 
                 <div className="space-y-3 sm:space-y-4">
