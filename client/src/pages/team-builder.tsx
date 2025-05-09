@@ -1254,7 +1254,7 @@ export default function TeamBuilder() {
               </h3>
               {teamStrengths.length > 0 ? (
                 <ul className="space-y-2 sm:space-y-4">
-                  {teamStrengths.map((strength) => (
+                  {teamStrengths.map((strength: {id: number; text: string; detail: string}) => (
                     <li key={strength.id} className="bg-green-50 p-2 sm:p-3 rounded-lg">
                       <div className="flex mb-1">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-green-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -1283,7 +1283,7 @@ export default function TeamBuilder() {
               </h3>
               {teamChallenges.length > 0 ? (
                 <ul className="space-y-2 sm:space-y-4">
-                  {teamChallenges.map((challenge) => (
+                  {teamChallenges.map((challenge: {id: number; text: string; detail: string; solution: string}) => (
                     <li key={challenge.id} className="bg-red-50 p-2 sm:p-3 rounded-lg">
                       <div className="flex mb-1">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mt-0.5 mr-1 sm:mr-2 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
