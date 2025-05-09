@@ -1113,52 +1113,71 @@ export default function TeamBuilder() {
                   {/* モバイル表示 */}
                   <div className="block sm:hidden">
                     {teamMembers.map((member) => (
-                      <div key={member.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
-                                {getUserInitials(member.username)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="ml-2">
+                      <div key={member.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-3">
+                        <div className="flex items-start">
+                          <Avatar className="h-10 w-10 mt-0.5">
+                            <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
+                              {getUserInitials(member.username)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="ml-3 flex-1">
+                            <div className="flex items-center justify-between mb-1">
                               <div className="text-sm font-medium text-gray-900">{member.username}</div>
-                              {member.mbtiType ? (
-                                <span className={`px-1 inline-flex text-[10px] leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
-                                  {member.mbtiType}
+                              <Checkbox 
+                                checked={member.selected}
+                                onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
+                                className="h-4 w-4"
+                              />
+                            </div>
+                            
+                            {member.mbtiType ? (
+                              <span className={`px-1.5 mb-2 inline-flex text-[10px] leading-5 font-semibold rounded-full ${getMbtiTypeColorClass(member.mbtiType)}`}>
+                                {member.mbtiType}
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-[10px] mb-2 block">MBTIタイプ未設定</span>
+                            )}
+                            
+                            <div className="text-[10px] text-gray-500 mb-1.5">
+                              <span className="font-medium text-gray-600 mr-1">役割：</span>
+                              {member.role || "未設定"}
+                            </div>
+                            
+                            <div className="text-[10px] text-gray-500 mb-1.5">
+                              <span className="font-medium text-gray-600 mr-1">スキル：</span>
+                              {member.skills ? (
+                                <span>
+                                  {typeof member.skills === 'string'
+                                    ? member.skills.split(',').map((skill, idx) => (
+                                        <span key={idx} className="inline-block bg-gray-100 rounded px-1 py-0.5 mr-1 mb-1">
+                                          {skill.trim()}
+                                        </span>
+                                      ))
+                                    : Array.isArray(member.skills)
+                                      ? member.skills.map((skill, idx) => (
+                                          <span key={idx} className="inline-block bg-gray-100 rounded px-1 py-0.5 mr-1 mb-1">
+                                            {skill}
+                                          </span>
+                                        ))
+                                      : member.skills
+                                  }
                                 </span>
                               ) : (
-                                <span className="text-gray-400 text-[10px]">MBTIタイプ未設定</span>
+                                "未設定"
                               )}
                             </div>
+                            
+                            <div className="flex justify-end mt-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleDeleteMember(member.id)}
+                                className="text-red-600 hover:text-red-800 h-7 px-2 py-0"
+                              >
+                                削除
+                              </Button>
+                            </div>
                           </div>
-                          <Checkbox 
-                            checked={member.selected}
-                            onCheckedChange={(checked) => handleMemberSelection(member.id, checked as boolean)}
-                            className="h-4 w-4"
-                          />
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2 text-[10px] text-gray-500">
-                          <div>
-                            <span className="font-medium text-gray-600">役割：</span>
-                            {member.role || "未設定"}
-                          </div>
-                          <div>
-                            <span className="font-medium text-gray-600">スキル：</span>
-                            {member.skills || "未設定"}
-                          </div>
-                        </div>
-                        
-                        <div className="flex justify-end">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDeleteMember(member.id)}
-                            className="text-red-600 hover:text-red-800 h-7 px-2 py-0"
-                          >
-                            削除
-                          </Button>
                         </div>
                       </div>
                     ))}
@@ -1202,7 +1221,26 @@ export default function TeamBuilder() {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {member.skills || "未設定"}
+                              {member.skills ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {typeof member.skills === 'string'
+                                    ? member.skills.split(',').map((skill, idx) => (
+                                        <span key={idx} className="inline-block bg-gray-100 rounded px-1.5 py-0.5 text-xs">
+                                          {skill.trim()}
+                                        </span>
+                                      ))
+                                    : Array.isArray(member.skills)
+                                      ? member.skills.map((skill, idx) => (
+                                          <span key={idx} className="inline-block bg-gray-100 rounded px-1.5 py-0.5 text-xs">
+                                            {skill}
+                                          </span>
+                                        ))
+                                      : member.skills
+                                  }
+                                </div>
+                              ) : (
+                                "未設定"
+                              )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {member.role || "未設定"}
